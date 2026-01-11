@@ -48,22 +48,22 @@ def get_video_info(url):
     
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         try:
-            # Attempt 1: Stealth Extraction
+            # Combined extraction logic
             info = ydl.extract_info(url, download=False)
             
-            # Attempt 2: Fallback to TV client if needed
             if info is None:
-                logger.info("Attempt 1 failed, trying TV client fallback...")
+                # If extraction fails, try one more time with strictly the TV client
+                logger.info("Primary extraction returned None, attempting TV client fallback...")
                 ydl_opts['extractor_args']['youtube']['player_client'] = ['tv']
                 with yt_dlp.YoutubeDL(ydl_opts) as ydl_retry:
                     info = ydl_retry.extract_info(url, download=False)
 
-            if info is None:
-                return {"error": "Bot Detection: YouTube is blocking this server's IP. This is common on shared hosting. Please try a different video or try again in a few minutes."}
+            if not info:
+                return {"error": "Bot Detection: YouTube is currently blocking the server's IP. This usually resolves itself in a few minutes, or you can try a different video link."}
 
             formats = info.get('formats') or []
             
-            # Categorize and deduplicate formats
+            # Robust deduplication and categorization
             normal_map = {}
             audio_map = {}
             video_map = {}
@@ -71,70 +71,58 @@ def get_video_info(url):
             for f in formats:
                 if not f or not f.get('url'): continue
                 
-                ext = f.get('ext')
+                ext = f.get('ext', 'mp4')
                 res = f.get('height')
-                filesize = f.get('filesize', 0)
-                filesize_mb = round(filesize / (1024 * 1024), 2) if filesize else "N/A"
+                filesize = f.get('filesize') or f.get('filesize_approx') or 0
+                filesize_mb = round(filesize / (1024 * 1024), 1) if filesize else "N/A"
                 
-                # Normal (Video + Audio)
+                # Full Video (Video + Audio)
                 if f.get('vcodec') != 'none' and f.get('acodec') != 'none':
-                    q_key = f"{res}p" if res else "Unknown"
-                    if q_key not in normal_map or (filesize > 0 and filesize > normal_map[q_key].get('_size_raw', 0)):
+                    q_key = f"{res}p" if res else "Auto"
+                    if q_key not in normal_map or filesize > normal_map[q_key].get('_size', 0):
                         normal_map[q_key] = {
-                            'quality': q_key, 'ext': ext, 'size': f'{filesize_mb} MB', 'url': f.get('url'), '_size_raw': filesize
+                            'quality': q_key, 'ext': ext, 'size': f'{filesize_mb} MB' if filesize_mb != "N/A" else "Standard", 
+                            'url': f.get('url'), '_size': filesize
                         }
                 
                 # Audio Only
                 elif f.get('vcodec') == 'none' and f.get('acodec') != 'none':
-                    abr = f.get('abr', 0)
-                    q_key = f'{int(abr)}kbps' if abr else 'Unknown'
-                    if q_key not in audio_map or (abr > 0 and abr > audio_map[q_key].get('_abr_raw', 0)):
+                    abr = f.get('abr') or 0
+                    q_key = f'{int(abr)}kbps' if abr else 'High Quality'
+                    if q_key not in audio_map or abr > audio_map[q_key].get('_abr', 0):
                         audio_map[q_key] = {
-                            'quality': q_key, 'ext': ext, 'size': f'{filesize_mb} MB', 'url': f.get('url'), '_abr_raw': abr
+                            'quality': q_key, 'ext': ext, 'size': f'{filesize_mb} MB' if filesize_mb != "N/A" else "Audio", 
+                            'url': f.get('url'), '_abr': abr
                         }
                 
-                # Video Only
+                # Video Only (Without Audio)
                 elif f.get('vcodec') != 'none' and f.get('acodec') == 'none':
                     q_key = f"{res}p" if res else "Unknown"
-                    if q_key not in video_map or (filesize > 0 and filesize > video_map[q_key].get('_size_raw', 0)):
+                    if q_key not in video_map or filesize > video_map[q_key].get('_size', 0):
                         video_map[q_key] = {
-                            'quality': q_key, 'ext': ext, 'size': f'{filesize_mb} MB', 'url': f.get('url'), '_size_raw': filesize
+                            'quality': q_key, 'ext': ext, 'size': f'{filesize_mb} MB' if filesize_mb != "N/A" else "Video", 
+                            'url': f.get('url'), '_size': filesize
                         }
 
-            # Convert maps to sorted lists
-            def sort_res(x):
-                val = x['quality'].replace('p','').replace('kbps','')
-                return int(val) if val.isdigit() else 0
+            # Helper to sort by resolution or bitrate
+            def sort_rank(x):
+                q = x['quality'].replace('p','').replace('kbps','')
+                return int(q) if q.isdigit() else 0
 
-            normal = sorted(normal_map.values(), key=sort_res, reverse=True)[:8]
-            audio = sorted(audio_map.values(), key=sort_res, reverse=True)[:8]
-            video = sorted(video_map.values(), key=sort_res, reverse=True)[:8]
-
-            return {
-                'title': info.get('title', 'Unknown Title'),
-                'thumbnail': info.get('thumbnail', ''),
-                'duration': info.get('duration', 0),
-                'uploader': info.get('uploader', 'Unknown Creator'),
-                'views': f"{info.get('view_count', 0):,}",
-                'upload_date': info.get('upload_date', ''),
-                'normal': normal,
-                'audio': audio,
-                'video': video
-            }
-
-            if not info:
-                return {"error": "Could not extract video information. The video might be private or restricted."}
+            # Get Top 8 for each category
+            final_normal = sorted(normal_map.values(), key=sort_rank, reverse=True)[:8]
+            final_audio = sorted(audio_map.values(), key=sort_rank, reverse=True)[:8]
+            final_video = sorted(video_map.values(), key=sort_rank, reverse=True)[:8]
 
             return {
-                'title': info.get('title', 'Unknown Title'),
+                'title': info.get('title', 'Untitled Video'),
                 'thumbnail': info.get('thumbnail', ''),
                 'duration': info.get('duration', 0),
-                'uploader': info.get('uploader', 'Unknown Creator'),
+                'uploader': info.get('uploader', 'Unknown Uploader'),
                 'views': f"{info.get('view_count', 0):,}",
-                'upload_date': info.get('upload_date', ''),
-                'normal': normal,
-                'audio': audio_only,
-                'video': video_only
+                'normal': final_normal,
+                'audio': final_audio,
+                'video': final_video
             }
         except Exception as e:
             error_msg = str(e)
