@@ -23,19 +23,20 @@ def get_video_info(url):
         'format': 'best',
         'extract_flat': False,
         'nocheckcertificate': True,
-        'ignoreerrors': False,
+        'ignoreerrors': True, # Changed to true to prevent hard crashes
         'logtostderr': False,
         'no_color': True,
         'no_proxy': True,
+        'socket_timeout': 30, # Prevent long-hanging requests
         'headers': {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
             'Accept-Language': 'en-US,en;q=0.9',
             'Sec-Fetch-Mode': 'navigate',
         },
         'extractor_args': {
             'youtube': {
-                'player_client': ['android', 'web'],
+                'player_client': ['ios', 'android', 'web'],
                 'skip': ['dash', 'hls']
             }
         }
@@ -89,10 +90,13 @@ def get_video_info(url):
             audio_only = sorted(audio_only, key=lambda x: int(x['quality'].replace('kbps','')) if 'kbps' in x['quality'] and x['quality'] != 'Unknown' else 0, reverse=True)[:8]
             video_only = sorted(video_only, key=lambda x: int(x['quality'].replace('p','')) if 'p' in x['quality'] and x['quality'] != 'Unknown' else 0, reverse=True)[:8]
 
+            if not info:
+                return {"error": "Could not extract video information. The video might be private or restricted."}
+
             return {
-                'title': info.get('title'),
-                'thumbnail': info.get('thumbnail'),
-                'duration': info.get('duration'),
+                'title': info.get('title', 'Unknown Title'),
+                'thumbnail': info.get('thumbnail', ''),
+                'duration': info.get('duration', 0),
                 'uploader': info.get('uploader', 'Unknown Creator'),
                 'views': f"{info.get('view_count', 0):,}",
                 'upload_date': info.get('upload_date', ''),
@@ -101,8 +105,11 @@ def get_video_info(url):
                 'video': video_only
             }
         except Exception as e:
-            logger.error(f"yt-dlp error: {str(e)}")
-            return {"error": str(e) if "Sign in" in str(e) else "Failed to extract video info. This site or video might be restricted."}
+            error_msg = str(e)
+            logger.error(f"yt-dlp error: {error_msg}")
+            if "Sign in" in error_msg:
+                return {"error": "Bot Detection: YouTube is blocking this request. Please try a different URL or try again later."}
+            return {"error": f"Extraction Error: {error_msg[:100]}..."}
 
 @app.route('/')
 def index():
