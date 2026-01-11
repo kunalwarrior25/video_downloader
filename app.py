@@ -36,17 +36,30 @@ def get_video_info(url):
         },
         'extractor_args': {
             'youtube': {
-                'player_client': ['ios', 'android', 'web'],
+                'player_client': ['android', 'web', 'tvhtml5', 'ios'],
+                'player_skip': ['webpage', 'configs'],
                 'skip': ['dash', 'hls']
             }
-        }
+        },
+        'geo_bypass': True,
+        'no_check_certificate': True,
+        'prefer_insecure': True
     }
+    
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         try:
+            # Attempt 1: Full Extraction
             info = ydl.extract_info(url, download=False)
             
+            # Attempt 2: If failed, try a "light" extraction with different client
             if info is None:
-                return {"error": "Extraction failed: The video might be private, age-restricted, or blocked in this region."}
+                logger.info("First attempt failed, retrying with fallback clients...")
+                ydl_opts['extractor_args']['youtube']['player_client'] = ['mweb', 'tv']
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl_retry:
+                    info = ydl_retry.extract_info(url, download=False)
+
+            if info is None:
+                return {"error": "Bot Detection: YouTube is blocking this request from this server. Try a different video or try again later."}
 
             formats = info.get('formats') or []
             
