@@ -3,12 +3,11 @@ from flask_cors import CORS
 import yt_dlp
 import os
 import logging
+import platform
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-import os
 
 # Get absolute path to the directory where app.py is located
 base_dir = os.path.abspath(os.path.dirname(__file__))
@@ -16,50 +15,83 @@ base_dir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__, static_folder=base_dir, template_folder=base_dir)
 CORS(app)
 
+# Check if running locally (for cookie support)
+IS_LOCAL = platform.system() == 'Windows' or os.path.exists('/Users')
+
 def get_video_info(url):
+    # Base options - maximum stealth configuration
     ydl_opts = {
         'quiet': True,
         'no_warnings': True,
         'format': 'best',
         'extract_flat': False,
         'nocheckcertificate': True,
-        'ignoreerrors': True, # Changed to true to prevent hard crashes
+        'ignoreerrors': False,
         'logtostderr': False,
         'no_color': True,
-        'no_proxy': True,
-        'socket_timeout': 30, # Prevent long-hanging requests
+        'socket_timeout': 45,
+        'retries': 3,
+        'fragment_retries': 3,
         'headers': {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Sec-Fetch-Mode': 'navigate',
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Accept-Encoding': 'gzip, deflate',
+            'DNT': '1',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
         },
         'extractor_args': {
             'youtube': {
-                'player_client': ['mweb', 'android', 'tvhtml5'],
-                'player_skip': ['webpage', 'configs'],
-                'skip': ['dash', 'hls']
+                'player_client': ['android', 'web'],
+                'player_skip': ['webpage', 'configs', 'js'],
             }
         },
         'geo_bypass': True,
-        'no_check_certificate': True,
-        'prefer_insecure': True
+        'geo_bypass_country': 'US',
     }
+    
+    # For local development, try to use browser cookies (much more reliable)
+    if IS_LOCAL:
+        # Try Chrome cookies first, then Firefox, then Edge
+        for browser in ['chrome', 'firefox', 'edge', 'safari']:
+            try:
+                ydl_opts['cookiesfrombrowser'] = (browser,)
+                logger.info(f"Attempting to use {browser} cookies for authentication...")
+                break
+            except Exception:
+                continue
     
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         try:
-            # Combined extraction logic
-            info = ydl.extract_info(url, download=False)
+            info = None
             
+            # Attempt 1: Standard extraction
+            try:
+                logger.info(f"Extracting video info from: {url}")
+                info = ydl.extract_info(url, download=False)
+            except Exception as e1:
+                logger.warning(f"Primary extraction failed: {e1}")
+            
+            # Attempt 2: If failed, try with different client
             if info is None:
-                # If extraction fails, try one more time with strictly the TV client
-                logger.info("Primary extraction returned None, attempting TV client fallback...")
-                ydl_opts['extractor_args']['youtube']['player_client'] = ['tv']
-                with yt_dlp.YoutubeDL(ydl_opts) as ydl_retry:
-                    info = ydl_retry.extract_info(url, download=False)
+                logger.info("Attempting fallback extraction with iOS client...")
+                ydl_opts_fallback = ydl_opts.copy()
+                ydl_opts_fallback['extractor_args'] = {
+                    'youtube': {
+                        'player_client': ['ios', 'mweb'],
+                    }
+                }
+                if 'cookiesfrombrowser' in ydl_opts_fallback:
+                    del ydl_opts_fallback['cookiesfrombrowser']
+                try:
+                    with yt_dlp.YoutubeDL(ydl_opts_fallback) as ydl_retry:
+                        info = ydl_retry.extract_info(url, download=False)
+                except Exception as e2:
+                    logger.warning(f"Fallback extraction also failed: {e2}")
 
             if not info:
-                return {"error": "Bot Detection: YouTube is currently blocking the server's IP. This usually resolves itself in a few minutes, or you can try a different video link."}
+                return {"error": "Extraction failed. YouTube may be blocking this request. Try: 1) A different video, 2) TikTok/Twitter/Instagram links work better, 3) Wait a few minutes and retry."}
 
             formats = info.get('formats') or []
             
