@@ -4,9 +4,10 @@ import yt_dlp
 import os
 import logging
 import platform
+import subprocess
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 # Get absolute path to the directory where app.py is located
@@ -19,149 +20,224 @@ CORS(app)
 IS_LOCAL = platform.system() == 'Windows' or os.path.exists('/Users')
 
 def get_video_info(url):
-    # Base options - maximum stealth configuration
+    """Extract video info with maximum compatibility across platforms."""
+    
+    # Detect platform type
+    is_youtube = 'youtube.com' in url or 'youtu.be' in url
+    
+    # Base options optimized for each platform
     ydl_opts = {
-        'quiet': True,
-        'no_warnings': True,
+        'quiet': False,
+        'verbose': True,
+        'no_warnings': False,
         'format': 'best',
         'extract_flat': False,
         'nocheckcertificate': True,
-        'ignoreerrors': False,
+        'ignoreerrors': True,
         'logtostderr': False,
         'no_color': True,
-        'socket_timeout': 45,
-        'retries': 3,
-        'fragment_retries': 3,
+        'socket_timeout': 60,
+        'retries': 5,
+        'fragment_retries': 5,
+        'http_chunk_size': 10485760,
         'headers': {
-            'User-Agent': 'Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.5',
-            'Accept-Encoding': 'gzip, deflate',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Accept-Encoding': 'gzip, deflate, br',
             'DNT': '1',
             'Connection': 'keep-alive',
             'Upgrade-Insecure-Requests': '1',
-        },
-        'extractor_args': {
-            'youtube': {
-                'player_client': ['android', 'web'],
-                'player_skip': ['webpage', 'configs', 'js'],
-            }
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'none',
+            'Sec-Fetch-User': '?1',
+            'Cache-Control': 'max-age=0',
         },
         'geo_bypass': True,
         'geo_bypass_country': 'US',
     }
     
-    # For local development, try to use browser cookies (much more reliable)
-    if IS_LOCAL:
-        # Try Chrome cookies first, then Firefox, then Edge
-        for browser in ['chrome', 'firefox', 'edge', 'safari']:
-            try:
-                ydl_opts['cookiesfrombrowser'] = (browser,)
-                logger.info(f"Attempting to use {browser} cookies for authentication...")
-                break
-            except Exception:
-                continue
+    # YouTube-specific settings
+    if is_youtube:
+        ydl_opts['extractor_args'] = {
+            'youtube': {
+                'player_client': ['android', 'web'],
+                'player_skip': ['webpage', 'configs'],
+            }
+        }
+        
+        # Try to use browser cookies on local machines
+        if IS_LOCAL:
+            logger.info("Running locally - attempting to use browser cookies...")
+            for browser in ['chrome', 'firefox', 'edge', 'brave', 'opera', 'safari']:
+                try:
+                    test_opts = ydl_opts.copy()
+                    test_opts['cookiesfrombrowser'] = (browser,)
+                    test_opts['quiet'] = True
+                    logger.info(f"Testing {browser} cookies...")
+                    ydl_opts['cookiesfrombrowser'] = (browser,)
+                    break
+                except Exception as e:
+                    logger.debug(f"{browser} cookies not available: {e}")
+                    continue
     
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+    info = None
+    last_error = None
+    
+    # Attempt 1: Primary extraction
+    try:
+        logger.info(f"[Attempt 1] Extracting: {url}")
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+    except Exception as e:
+        last_error = str(e)
+        logger.warning(f"[Attempt 1] Failed: {last_error}")
+    
+    # Attempt 2: Try without cookies and with different client
+    if not info and is_youtube:
         try:
-            info = None
-            
-            # Attempt 1: Standard extraction
-            try:
-                logger.info(f"Extracting video info from: {url}")
-                info = ydl.extract_info(url, download=False)
-            except Exception as e1:
-                logger.warning(f"Primary extraction failed: {e1}")
-            
-            # Attempt 2: If failed, try with different client
-            if info is None:
-                logger.info("Attempting fallback extraction with iOS client...")
-                ydl_opts_fallback = ydl_opts.copy()
-                ydl_opts_fallback['extractor_args'] = {
+            logger.info("[Attempt 2] Trying iOS/mweb client...")
+            ydl_opts2 = {
+                'quiet': True,
+                'format': 'best',
+                'nocheckcertificate': True,
+                'ignoreerrors': True,
+                'socket_timeout': 60,
+                'geo_bypass': True,
+                'extractor_args': {
                     'youtube': {
                         'player_client': ['ios', 'mweb'],
                     }
                 }
-                if 'cookiesfrombrowser' in ydl_opts_fallback:
-                    del ydl_opts_fallback['cookiesfrombrowser']
-                try:
-                    with yt_dlp.YoutubeDL(ydl_opts_fallback) as ydl_retry:
-                        info = ydl_retry.extract_info(url, download=False)
-                except Exception as e2:
-                    logger.warning(f"Fallback extraction also failed: {e2}")
-
-            if not info:
-                return {"error": "Extraction failed. YouTube may be blocking this request. Try: 1) A different video, 2) TikTok/Twitter/Instagram links work better, 3) Wait a few minutes and retry."}
-
-            formats = info.get('formats') or []
-            
-            # Robust deduplication and categorization
-            normal_map = {}
-            audio_map = {}
-            video_map = {}
-
-            for f in formats:
-                if not f or not f.get('url'): continue
-                
-                ext = f.get('ext', 'mp4')
-                res = f.get('height')
-                filesize = f.get('filesize') or f.get('filesize_approx') or 0
-                filesize_mb = round(filesize / (1024 * 1024), 1) if filesize else "N/A"
-                
-                # Full Video (Video + Audio)
-                if f.get('vcodec') != 'none' and f.get('acodec') != 'none':
-                    q_key = f"{res}p" if res else "Auto"
-                    if q_key not in normal_map or filesize > normal_map[q_key].get('_size', 0):
-                        normal_map[q_key] = {
-                            'quality': q_key, 'ext': ext, 'size': f'{filesize_mb} MB' if filesize_mb != "N/A" else "Standard", 
-                            'url': f.get('url'), '_size': filesize
-                        }
-                
-                # Audio Only
-                elif f.get('vcodec') == 'none' and f.get('acodec') != 'none':
-                    abr = f.get('abr') or 0
-                    q_key = f'{int(abr)}kbps' if abr else 'High Quality'
-                    if q_key not in audio_map or abr > audio_map[q_key].get('_abr', 0):
-                        audio_map[q_key] = {
-                            'quality': q_key, 'ext': ext, 'size': f'{filesize_mb} MB' if filesize_mb != "N/A" else "Audio", 
-                            'url': f.get('url'), '_abr': abr
-                        }
-                
-                # Video Only (Without Audio)
-                elif f.get('vcodec') != 'none' and f.get('acodec') == 'none':
-                    q_key = f"{res}p" if res else "Unknown"
-                    if q_key not in video_map or filesize > video_map[q_key].get('_size', 0):
-                        video_map[q_key] = {
-                            'quality': q_key, 'ext': ext, 'size': f'{filesize_mb} MB' if filesize_mb != "N/A" else "Video", 
-                            'url': f.get('url'), '_size': filesize
-                        }
-
-            # Helper to sort by resolution or bitrate
-            def sort_rank(x):
-                q = x['quality'].replace('p','').replace('kbps','')
-                return int(q) if q.isdigit() else 0
-
-            # Get Top 8 for each category
-            final_normal = sorted(normal_map.values(), key=sort_rank, reverse=True)[:8]
-            final_audio = sorted(audio_map.values(), key=sort_rank, reverse=True)[:8]
-            final_video = sorted(video_map.values(), key=sort_rank, reverse=True)[:8]
-
-            return {
-                'title': info.get('title', 'Untitled Video'),
-                'thumbnail': info.get('thumbnail', ''),
-                'duration': info.get('duration', 0),
-                'uploader': info.get('uploader', 'Unknown Uploader'),
-                'views': f"{info.get('view_count', 0):,}",
-                'normal': final_normal,
-                'audio': final_audio,
-                'video': final_video
             }
+            with yt_dlp.YoutubeDL(ydl_opts2) as ydl:
+                info = ydl.extract_info(url, download=False)
         except Exception as e:
-            error_msg = str(e)
-            logger.error(f"yt-dlp error: {error_msg}")
-            if "Sign in" in error_msg:
-                return {"error": "Bot Detection: YouTube is blocking this request. Please try a different URL or try again later."}
-            return {"error": f"Extraction Error: {error_msg[:100]}..."}
+            last_error = str(e)
+            logger.warning(f"[Attempt 2] Failed: {last_error}")
+    
+    # Attempt 3: Try tv_embedded client
+    if not info and is_youtube:
+        try:
+            logger.info("[Attempt 3] Trying tv_embedded client...")
+            ydl_opts3 = {
+                'quiet': True,
+                'format': 'best',
+                'nocheckcertificate': True,
+                'ignoreerrors': True,
+                'socket_timeout': 60,
+                'geo_bypass': True,
+                'extractor_args': {
+                    'youtube': {
+                        'player_client': ['tv_embedded'],
+                    }
+                }
+            }
+            with yt_dlp.YoutubeDL(ydl_opts3) as ydl:
+                info = ydl.extract_info(url, download=False)
+        except Exception as e:
+            last_error = str(e)
+            logger.warning(f"[Attempt 3] Failed: {last_error}")
+
+    # Handle failure
+    if not info:
+        if is_youtube:
+            return {
+                "error": "YouTube is blocking this request. This is common on shared servers. Try: TikTok, Twitter/X, Instagram, or Facebook links instead - they work great!",
+                "suggestion": "Try pasting a TikTok, Twitter, Instagram, or Facebook link instead."
+            }
+        else:
+            return {"error": f"Could not extract video. Error: {last_error[:150] if last_error else 'Unknown error'}"}
+    
+    # Process formats
+    formats = info.get('formats') or []
+    logger.info(f"Found {len(formats)} total formats")
+    
+    normal_map = {}
+    audio_map = {}
+    video_map = {}
+
+    for f in formats:
+        if not f or not f.get('url'):
+            continue
+        
+        url_str = f.get('url', '')
+        # Skip formats that require additional fetching
+        if 'manifest' in url_str.lower() or not url_str.startswith('http'):
+            continue
+            
+        ext = f.get('ext', 'mp4')
+        res = f.get('height')
+        filesize = f.get('filesize') or f.get('filesize_approx') or 0
+        filesize_mb = round(filesize / (1024 * 1024), 1) if filesize else None
+        size_str = f'{filesize_mb} MB' if filesize_mb else "Stream"
+        
+        vcodec = f.get('vcodec', 'none') or 'none'
+        acodec = f.get('acodec', 'none') or 'none'
+        
+        has_video = vcodec != 'none'
+        has_audio = acodec != 'none'
+        
+        # Full Video (Video + Audio)
+        if has_video and has_audio:
+            q_key = f"{res}p" if res else "Auto"
+            if q_key not in normal_map or (filesize or 0) > normal_map[q_key].get('_size', 0):
+                normal_map[q_key] = {
+                    'quality': q_key, 'ext': ext, 'size': size_str,
+                    'url': f.get('url'), '_size': filesize or 0
+                }
+        
+        # Audio Only
+        elif has_audio and not has_video:
+            abr = f.get('abr') or f.get('tbr') or 0
+            q_key = f'{int(abr)}kbps' if abr else 'Audio'
+            if q_key not in audio_map or (abr or 0) > audio_map[q_key].get('_abr', 0):
+                audio_map[q_key] = {
+                    'quality': q_key, 'ext': ext, 'size': size_str,
+                    'url': f.get('url'), '_abr': abr or 0
+                }
+        
+        # Video Only (Without Audio)
+        elif has_video and not has_audio:
+            q_key = f"{res}p" if res else "Video"
+            if q_key not in video_map or (filesize or 0) > video_map[q_key].get('_size', 0):
+                video_map[q_key] = {
+                    'quality': q_key, 'ext': ext, 'size': size_str,
+                    'url': f.get('url'), '_size': filesize or 0
+                }
+
+    def sort_rank(x):
+        q = x['quality'].replace('p', '').replace('kbps', '').replace('k', '')
+        try:
+            return int(q)
+        except ValueError:
+            return 0
+
+    # Get Top 8 for each category, remove internal keys
+    def clean_list(items):
+        result = []
+        for item in items:
+            clean_item = {k: v for k, v in item.items() if not k.startswith('_')}
+            result.append(clean_item)
+        return result
+
+    final_normal = clean_list(sorted(normal_map.values(), key=sort_rank, reverse=True)[:8])
+    final_audio = clean_list(sorted(audio_map.values(), key=sort_rank, reverse=True)[:8])
+    final_video = clean_list(sorted(video_map.values(), key=sort_rank, reverse=True)[:8])
+
+    logger.info(f"Processed: {len(final_normal)} normal, {len(final_audio)} audio, {len(final_video)} video-only")
+
+    return {
+        'title': info.get('title', 'Untitled Video'),
+        'thumbnail': info.get('thumbnail', ''),
+        'duration': info.get('duration') or 0,
+        'uploader': info.get('uploader') or info.get('channel') or 'Unknown',
+        'views': f"{info.get('view_count', 0):,}" if info.get('view_count') else "N/A",
+        'normal': final_normal,
+        'audio': final_audio,
+        'video': final_video
+    }
 
 @app.route('/')
 def index():
