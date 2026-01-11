@@ -1,86 +1,134 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, render_template, request, jsonify, send_from_directory, send_file
 from flask_cors import CORS
 import yt_dlp
-import os, uuid, threading, time, re
+import os
+import logging
 
-app = Flask(__name__)
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+import os
+
+# Get absolute path to the directory where app.py is located
+base_dir = os.path.abspath(os.path.dirname(__file__))
+
+app = Flask(__name__, static_folder=base_dir, template_folder=base_dir)
 CORS(app)
 
-DOWNLOAD_FOLDER = '/tmp/downloads'
-os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
-
-def cleanup():
-    while True:
-        time.sleep(300)
-        for f in os.listdir(DOWNLOAD_FOLDER):
-            path = os.path.join(DOWNLOAD_FOLDER, f)
-            if os.path.getmtime(path) < time.time() - 300:
-                try: os.remove(path)
-                except: pass
-
-threading.Thread(target=cleanup, daemon=True).start()
-
-def sanitize(name):
-    return re.sub(r'[\\/*?:"<>|]', '', name)[:100]
-
-@app.route('/')
-def home():
-    return jsonify({'status': 'VidGrab API Running', 'endpoints': ['/api/info', '/api/download']})
-
-@app.route('/api/info', methods=['POST'])
-def get_info():
-    url = request.json.get('url')
-    if not url:
-        return jsonify({'error': 'URL required'}), 400
-    try:
-        with yt_dlp.YoutubeDL({'quiet': True}) as ydl:
+def get_video_info(url):
+    ydl_opts = {
+        'quiet': True,
+        'no_warnings': True,
+        'format': 'best',
+        'extract_flat': False,
+        'nocheckcertificate': True,
+        'ignoreerrors': False,
+        'logtostderr': False,
+        'no_color': True,
+        'no_proxy': True,
+        'headers': {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        }
+    }
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        try:
             info = ydl.extract_info(url, download=False)
-            return jsonify({
+            formats = info.get('formats', [])
+            
+            # Categorize formats
+            normal = []
+            audio_only = []
+            video_only = []
+
+            for f in formats:
+                ext = f.get('ext')
+                res = f.get('height')
+                filesize = f.get('filesize', 0)
+                filesize_mb = round(filesize / (1024 * 1024), 2) if filesize else "N/A"
+                
+                # Normal (Video + Audio)
+                if f.get('vcodec') != 'none' and f.get('acodec') != 'none':
+                    normal.append({
+                        'quality': f'{res}p' if res else 'Unknown',
+                        'ext': ext,
+                        'size': f'{filesize_mb} MB',
+                        'url': f.get('url')
+                    })
+                
+                # Audio Only
+                elif f.get('vcodec') == 'none' and f.get('acodec') != 'none':
+                    abr = f.get('abr', 0)
+                    audio_only.append({
+                        'quality': f'{int(abr)}kbps' if abr else 'Unknown',
+                        'ext': ext,
+                        'size': f'{filesize_mb} MB',
+                        'url': f.get('url')
+                    })
+                
+                # Video Only (Without Audio)
+                elif f.get('vcodec') != 'none' and f.get('acodec') == 'none':
+                    video_only.append({
+                        'quality': f'{res}p' if res else 'Unknown',
+                        'ext': ext,
+                        'size': f'{filesize_mb} MB',
+                        'url': f.get('url')
+                    })
+
+            # Sort and take top 8 of each
+            normal = sorted(normal, key=lambda x: int(x['quality'].replace('p','')) if 'p' in x['quality'] and x['quality'] != 'Unknown' else 0, reverse=True)[:8]
+            audio_only = sorted(audio_only, key=lambda x: int(x['quality'].replace('kbps','')) if 'kbps' in x['quality'] and x['quality'] != 'Unknown' else 0, reverse=True)[:8]
+            video_only = sorted(video_only, key=lambda x: int(x['quality'].replace('p','')) if 'p' in x['quality'] and x['quality'] != 'Unknown' else 0, reverse=True)[:8]
+
+            return {
                 'title': info.get('title'),
                 'thumbnail': info.get('thumbnail'),
                 'duration': info.get('duration'),
-                'uploader': info.get('uploader'),
-                'view_count': info.get('view_count'),
-                'like_count': info.get('like_count')
-            })
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+                'uploader': info.get('uploader', 'Unknown Creator'),
+                'views': f"{info.get('view_count', 0):,}",
+                'upload_date': info.get('upload_date', ''),
+                'normal': normal,
+                'audio': audio_only,
+                'video': video_only
+            }
+        except Exception as e:
+            logger.error(f"yt-dlp error: {str(e)}")
+            return {"error": str(e) if "Sign in" in str(e) else "Failed to extract video info. This site or video might be restricted."}
 
-@app.route('/api/download', methods=['POST'])
-def download():
+@app.route('/')
+def index():
+    # List of possible locations for index.html
+    locations = [
+        base_dir,
+        os.path.join(base_dir, 'templates'),
+        os.path.join(base_dir, 'template')
+    ]
+    
+    for loc in locations:
+        if os.path.exists(os.path.join(loc, 'index.html')):
+            return send_from_directory(loc, 'index.html')
+            
+    return """
+    <body style="background:#0f172a;color:#f8fafc;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;">
+        <h1 style="color:#ef4444">File Not Found</h1>
+        <p>Could not find <b>index.html</b> in your project folders.</p>
+        <p>Please ensure index.html is in: <br><code>""" + base_dir + """</code><br> or in a <code>/templates</code> folder.</p>
+    </body>
+    """
+
+@app.route('/health')
+def health():
+    return jsonify({"status": "healthy"}), 200
+
+@app.route('/analyze', methods=['POST'])
+def analyze():
     url = request.json.get('url')
-    fmt = request.json.get('format', '720p')
-    file_id = str(uuid.uuid4())
-    out = os.path.join(DOWNLOAD_FOLDER, file_id)
+    if not url:
+        return jsonify({"error": "No URL provided"}), 400
     
-    # Audio formats
-    if fmt.startswith('mp3'):
-        br = fmt.split('-')[1] if '-' in fmt else '192'
-        opts = {'format': 'bestaudio', 'outtmpl': out+'.%(ext)s',
-                'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': br}]}
-    elif fmt == 'm4a':
-        opts = {'format': 'bestaudio[ext=m4a]/bestaudio', 'outtmpl': out+'.%(ext)s'}
-    # Video only (no audio)
-    elif fmt.startswith('video-'):
-        q = fmt.replace('video-','').replace('p','')
-        opts = {'format': f'bestvideo[height<={q}]', 'outtmpl': out+'.%(ext)s'}
-    # Video + Audio
-    else:
-        q = fmt.replace('p','')
-        opts = {'format': f'bestvideo[height<={q}]+bestaudio/best[height<={q}]/best',
-                'outtmpl': out+'.%(ext)s', 'merge_output_format': 'mp4'}
-    
-    try:
-        with yt_dlp.YoutubeDL(opts) as ydl:
-            info = ydl.extract_info(url)
-            for f in os.listdir(DOWNLOAD_FOLDER):
-                if f.startswith(file_id):
-                    ext = f.split('.')[-1]
-                    name = sanitize(info.get('title','video')) + '.' + ext
-                    return send_file(os.path.join(DOWNLOAD_FOLDER,f), as_attachment=True, download_name=name)
-        return jsonify({'error': 'File not found'}), 404
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    result = get_video_info(url)
+    return jsonify(result)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host='0.0.0.0', port=port)
