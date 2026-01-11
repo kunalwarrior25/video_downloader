@@ -185,8 +185,28 @@
                 <span class="platform-tag border-yellow-500/30 text-yellow-400"><i class="fab fa-youtube mr-2"></i>YouTube ⚠</span>
                 <span class="platform-tag">+ 1000 more</span>
             </div>
+            
+            <!-- Quick Test Links -->
+            <div class="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-6 max-w-3xl mx-auto mb-8">
+                <p class="text-slate-300 text-sm mb-4 font-semibold"><i class="fas fa-bolt text-yellow-400 mr-2"></i>Quick Test - Click to try these working links:</p>
+                <div class="flex flex-wrap justify-center gap-3">
+                    <button onclick="testLink('https://www.tiktok.com/@scout2015/video/6718335390845095173')" class="bg-pink-500/20 hover:bg-pink-500/40 text-pink-300 px-4 py-2 rounded-xl text-sm font-bold transition border border-pink-500/30">
+                        <i class="fab fa-tiktok mr-2"></i>Test TikTok
+                    </button>
+                    <button onclick="testLink('https://twitter.com/NASA/status/1704953675779166697')" class="bg-blue-500/20 hover:bg-blue-500/40 text-blue-300 px-4 py-2 rounded-xl text-sm font-bold transition border border-blue-500/30">
+                        <i class="fab fa-twitter mr-2"></i>Test Twitter
+                    </button>
+                    <button onclick="testLink('https://www.instagram.com/reel/CzV2gVNMm7V/')" class="bg-purple-500/20 hover:bg-purple-500/40 text-purple-300 px-4 py-2 rounded-xl text-sm font-bold transition border border-purple-500/30">
+                        <i class="fab fa-instagram mr-2"></i>Test Instagram
+                    </button>
+                    <button onclick="testLink('https://vimeo.com/148751763')" class="bg-cyan-500/20 hover:bg-cyan-500/40 text-cyan-300 px-4 py-2 rounded-xl text-sm font-bold transition border border-cyan-500/30">
+                        <i class="fab fa-vimeo mr-2"></i>Test Vimeo
+                    </button>
+                </div>
+            </div>
+            
             <div class="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 max-w-2xl mx-auto mb-12">
-                <p class="text-yellow-400 text-sm"><i class="fas fa-info-circle mr-2"></i><strong>Note:</strong> YouTube often blocks shared server IPs. For best results, try <strong>TikTok, Twitter, Instagram, or Facebook</strong> links. YouTube works best when running locally.</p>
+                <p class="text-yellow-400 text-sm"><i class="fas fa-info-circle mr-2"></i><strong>Note:</strong> YouTube often blocks shared server IPs. For best results, try <strong>TikTok, Twitter, Instagram, or Facebook</strong> links. YouTube works best when running locally with browser cookies.</p>
             </div>
         </div>
 
@@ -470,6 +490,11 @@
         function hideError() {
             const existing = document.getElementById('errorBanner');
             if (existing) existing.remove();
+        }
+
+        function testLink(url) {
+            document.getElementById('videoUrl').value = url;
+            analyzeVideo();
         }
     </script>
 </body>
