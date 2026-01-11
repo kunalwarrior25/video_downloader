@@ -44,7 +44,11 @@ def get_video_info(url):
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         try:
             info = ydl.extract_info(url, download=False)
-            formats = info.get('formats', [])
+            
+            if info is None:
+                return {"error": "Extraction failed: The video might be private, age-restricted, or blocked in this region."}
+
+            formats = info.get('formats') or []
             
             # Categorize formats
             normal = []
@@ -52,6 +56,7 @@ def get_video_info(url):
             video_only = []
 
             for f in formats:
+                if not f: continue
                 ext = f.get('ext')
                 res = f.get('height')
                 filesize = f.get('filesize', 0)
