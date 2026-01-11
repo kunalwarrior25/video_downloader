@@ -330,6 +330,9 @@
                 });
                 
                 if (!response.ok) {
+                    if (response.status === 502 || response.status === 504) {
+                        throw new Error("Server is taking too long to respond. This usually happens if the video platform is blocking the request. Please try again in a few seconds.");
+                    }
                     const errorData = await response.json().catch(() => ({}));
                     throw new Error(errorData.error || `Server error: ${response.status}`);
                 }
