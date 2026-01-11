@@ -36,7 +36,7 @@ def get_video_info(url):
         },
         'extractor_args': {
             'youtube': {
-                'player_client': ['android', 'web', 'tvhtml5', 'ios'],
+                'player_client': ['mweb', 'android', 'tvhtml5'],
                 'player_skip': ['webpage', 'configs'],
                 'skip': ['dash', 'hls']
             }
@@ -48,28 +48,29 @@ def get_video_info(url):
     
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         try:
-            # Attempt 1: Full Extraction
+            # Attempt 1: Stealth Extraction
             info = ydl.extract_info(url, download=False)
             
-            # Attempt 2: If failed, try a "light" extraction with different client
+            # Attempt 2: Fallback to TV client if needed
             if info is None:
-                logger.info("First attempt failed, retrying with fallback clients...")
-                ydl_opts['extractor_args']['youtube']['player_client'] = ['mweb', 'tv']
+                logger.info("Attempt 1 failed, trying TV client fallback...")
+                ydl_opts['extractor_args']['youtube']['player_client'] = ['tv']
                 with yt_dlp.YoutubeDL(ydl_opts) as ydl_retry:
                     info = ydl_retry.extract_info(url, download=False)
 
             if info is None:
-                return {"error": "Bot Detection: YouTube is blocking this request from this server. Try a different video or try again later."}
+                return {"error": "Bot Detection: YouTube is blocking this server's IP. This is common on shared hosting. Please try a different video or try again in a few minutes."}
 
             formats = info.get('formats') or []
             
-            # Categorize formats
-            normal = []
-            audio_only = []
-            video_only = []
+            # Categorize and deduplicate formats
+            normal_map = {}
+            audio_map = {}
+            video_map = {}
 
             for f in formats:
-                if not f: continue
+                if not f or not f.get('url'): continue
+                
                 ext = f.get('ext')
                 res = f.get('height')
                 filesize = f.get('filesize', 0)
@@ -77,36 +78,49 @@ def get_video_info(url):
                 
                 # Normal (Video + Audio)
                 if f.get('vcodec') != 'none' and f.get('acodec') != 'none':
-                    normal.append({
-                        'quality': f'{res}p' if res else 'Unknown',
-                        'ext': ext,
-                        'size': f'{filesize_mb} MB',
-                        'url': f.get('url')
-                    })
+                    q_key = f"{res}p" if res else "Unknown"
+                    if q_key not in normal_map or (filesize > 0 and filesize > normal_map[q_key].get('_size_raw', 0)):
+                        normal_map[q_key] = {
+                            'quality': q_key, 'ext': ext, 'size': f'{filesize_mb} MB', 'url': f.get('url'), '_size_raw': filesize
+                        }
                 
                 # Audio Only
                 elif f.get('vcodec') == 'none' and f.get('acodec') != 'none':
                     abr = f.get('abr', 0)
-                    audio_only.append({
-                        'quality': f'{int(abr)}kbps' if abr else 'Unknown',
-                        'ext': ext,
-                        'size': f'{filesize_mb} MB',
-                        'url': f.get('url')
-                    })
+                    q_key = f'{int(abr)}kbps' if abr else 'Unknown'
+                    if q_key not in audio_map or (abr > 0 and abr > audio_map[q_key].get('_abr_raw', 0)):
+                        audio_map[q_key] = {
+                            'quality': q_key, 'ext': ext, 'size': f'{filesize_mb} MB', 'url': f.get('url'), '_abr_raw': abr
+                        }
                 
-                # Video Only (Without Audio)
+                # Video Only
                 elif f.get('vcodec') != 'none' and f.get('acodec') == 'none':
-                    video_only.append({
-                        'quality': f'{res}p' if res else 'Unknown',
-                        'ext': ext,
-                        'size': f'{filesize_mb} MB',
-                        'url': f.get('url')
-                    })
+                    q_key = f"{res}p" if res else "Unknown"
+                    if q_key not in video_map or (filesize > 0 and filesize > video_map[q_key].get('_size_raw', 0)):
+                        video_map[q_key] = {
+                            'quality': q_key, 'ext': ext, 'size': f'{filesize_mb} MB', 'url': f.get('url'), '_size_raw': filesize
+                        }
 
-            # Sort and take top 8 of each
-            normal = sorted(normal, key=lambda x: int(x['quality'].replace('p','')) if 'p' in x['quality'] and x['quality'] != 'Unknown' else 0, reverse=True)[:8]
-            audio_only = sorted(audio_only, key=lambda x: int(x['quality'].replace('kbps','')) if 'kbps' in x['quality'] and x['quality'] != 'Unknown' else 0, reverse=True)[:8]
-            video_only = sorted(video_only, key=lambda x: int(x['quality'].replace('p','')) if 'p' in x['quality'] and x['quality'] != 'Unknown' else 0, reverse=True)[:8]
+            # Convert maps to sorted lists
+            def sort_res(x):
+                val = x['quality'].replace('p','').replace('kbps','')
+                return int(val) if val.isdigit() else 0
+
+            normal = sorted(normal_map.values(), key=sort_res, reverse=True)[:8]
+            audio = sorted(audio_map.values(), key=sort_res, reverse=True)[:8]
+            video = sorted(video_map.values(), key=sort_res, reverse=True)[:8]
+
+            return {
+                'title': info.get('title', 'Unknown Title'),
+                'thumbnail': info.get('thumbnail', ''),
+                'duration': info.get('duration', 0),
+                'uploader': info.get('uploader', 'Unknown Creator'),
+                'views': f"{info.get('view_count', 0):,}",
+                'upload_date': info.get('upload_date', ''),
+                'normal': normal,
+                'audio': audio,
+                'video': video
+            }
 
             if not info:
                 return {"error": "Could not extract video information. The video might be private or restricted."}
