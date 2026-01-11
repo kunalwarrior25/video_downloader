@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VidGrab Pro - Ultimate Video Downloader</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Rajdhani', sans-serif;
+        }
+        
+        body {
+            background: #0a0a0f;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Animated Background */
+        .bg-animated {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(ellipse at 20% 20%, rgba(120, 0, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(0, 200, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(255, 0, 150, 0.1) 0%, transparent 50%);
+            animation: bgPulse 8s ease-in-out infinite;
+        }
+        
+        @keyframes bgPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        /* Floating Particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: linear-gradient(45deg, #00f5ff, #bf00ff);
+            border-radius: 50%;
+            animation: float 15s infinite;
+            opacity: 0.6;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+        
+        /* Grid Lines */
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image: 
+                linear-gradient(rgba(0, 245, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 245, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+        
+        /* Neon Text */
+        .neon-text {
+            text-shadow: 
+                0 0 10px rgba(0, 245, 255, 0.8),
+                0 0 20px rgba(0, 245, 255, 0.6),
+                0 0 40px rgba(0, 245, 255, 0.4);
+        }
+        
+        .neon-text-purple {
+            text-shadow: 
+                0 0 10px rgba(191, 0, 255, 0.8),
+                0 0 20px rgba(191, 0, 255, 0.6),
+                0 0 40px rgba(191, 0, 255, 0.4);
+        }
+        
+        /* Logo Style */
+        .logo-text {
+            font-family: 'Orbitron', sans-serif;
+            background: linear-gradient(135deg, #00f5ff, #bf00ff, #ff0080);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Glass Card */
+        .glass-card {
+            background: rgba(15, 15, 25, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 245, 255, 0.1);
+            box-shadow: 
+                0 0 30px rgba(0, 245, 255, 0.1),
+                inset 0 0 30px rgba(0, 245, 255, 0.02);
+        }
+        
+        .glass-card:hover {
+            border-color: rgba(0, 245, 255, 0.3);
+            box-shadow: 
+                0 0 50px rgba(0, 245, 255, 0.15),
+                inset 0 0 30px rgba(0, 245, 255, 0.05);
+        }
+        
+        /* Cyber Button */
+        .cyber-btn {
+            position: relative;
+            background: linear-gradient(135deg, #00f5ff, #bf00ff);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .cyber-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .cyber-btn:hover::before {
+            left: 100%;
+        }
+        
+        .cyber-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 10px 40px rgba(0, 245, 255, 0.4),
+                0 0 60px rgba(191, 0, 255, 0.3);
+        }
+        
+        /* Download Buttons */
+        .dl-btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .dl-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+        
+        .dl-btn:hover::after {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .dl-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        /* Input Glow */
+        .input-cyber {
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(0, 245, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .input-cyber:focus {
+            border-color: #00f5ff;
+            box-shadow: 
+                0 0 20px rgba(0, 245, 255, 0.3),
+                inset 0 0 20px rgba(0, 245, 255, 0.05);
+        }
+        
+        /* Platform Icons Animation */
+        .platform-icon {
+            transition: all 0.3s ease;
+        }
+        
+        .platform-icon:hover {
+            transform: translateY(-10px) scale(1.2);
+            filter: drop-shadow(0 10px 20px currentColor);
+        }
+        
+        /* Spinner */
+        .cyber-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid transparent;
+            border-top-color: #00f5ff;
+            border-right-color: #bf00ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Pulse Ring */
+        .pulse-ring {
+            animation: pulse-ring 1.5s infinite;
+        }
+        
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(0, 245, 255, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(0, 245, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 245, 255, 0); }
+        }
+        
+        /* Fade animations */
+        .fade-up {
+            animation: fadeUp 0.5s ease forwards;
+        }
+        
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #0a0a0f;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #00f5ff, #bf00ff);
+            border-radius: 4px;
+        }
+        
+        /* Tab active state */
+        .tab-active {
+            background: linear-gradient(135deg, rgba(0, 245, 255, 0.2), rgba(191, 0, 255, 0.2));
+            border-color: #00f5ff;
+        }
+    </style>
+</head>
+<body class="text-white">
+    <!-- Animated Background -->
+    <div class="bg-animated"></div>
+    <div class="grid-bg"></div>
+    <div class="particles" id="particles"></div>
+
+    <!-- Navigation -->
+    <nav class="py-4 px-6 border-b border-cyan-500/20 relative z-10">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-gradient-to-br from-cyan-400 to-purple-600 rounded-xl flex items-center justify-center pulse-ring">
+                    <i class="fas fa-download text-2xl"></i>
+                </div>
+                <span class="logo-text text-2xl font-bold tracking-wider">VIDGRAB PRO</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2 bg-green-500/20 border border-green-500/40 rounded-full px-4 py-2">
+                    <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                    <span class="text-green-400 text-sm font-semibold">ONLINE</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="px-4 py-12 relative z-10">
+        <div class="max-w-4xl mx-auto">
+            <!-- Hero -->
+            <div class="text-center mb-12">
+                <h1 class="text-5xl md:text-7xl font-bold mb-4 tracking-tight">
+                    <span class="neon-text">DOWNLOAD</span>
+                    <span class="neon-text-purple">ANYTHING</span>
+                </h1>
+                <p class="text-gray-400 text-xl md:text-2xl font-light tracking-wide">
+                    YouTube • TikTok • Instagram • Facebook • Twitter • 1000+ Sites
+                </p>
+                <p class="text-cyan-400 mt-2 text-lg">No Sign Up Required • 100% Free • Unlimited Downloads</p>
+            </div>
+
+            <!-- Main Download Box -->
+            <div class="glass-card rounded-3xl p-6 md:p-10 mb-10 transition-all duration-500">
+                <!-- URL Input -->
+                <div class="flex flex-col lg:flex-row gap-4 mb-6">
+                    <div class="flex-1 relative">
+                        <div class="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400">
+                            <i class="fas fa-link text-xl"></i>
+                        </div>
+                        <input 
+                            type="text" 
+                            id="urlInput"
+                            placeholder="Paste your video link here..."
+                            class="w-full input-cyber rounded-2xl px-14 py-5 text-white text-lg placeholder-gray-500 focus:outline-none"
+                        >
+                        <button 
+                            onclick="pasteFromClipboard()"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 bg-cyan-500/20 hover:bg-cyan-500/40 text-cyan-400 px-4 py-2 rounded-xl transition flex items-center gap-2"
+                        >
+                            <i class="fas fa-clipboard"></i>
+                            <span class="hidden sm:inline">Paste</span>
+                        </button>
+                    </div>
+                    <button 
+                        id="fetchBtn"
+                        onclick="fetchVideo()"
+                        class="cyber-btn text-white px-10 py-5 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 tracking-wide"
+                    >
+                        <i class="fas fa-bolt"></i>
+                        <span>GET VIDEO</span>
+                    </button>
+                </div>
+
+                <!-- Platform Badge -->
+                <div id="platformBadge" class="hidden mb-6 fade-up">
+                    <div class="inline-flex items-center gap-3 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-500/30 rounded-full px-5 py-3">
+                        <i id="platformIcon" class="text-2xl"></i>
+                        <span id="platformText" class="font-semibold tracking-wide"></span>
+                        <i class="fas fa-check-circle text-green-400"></i>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div id="loadingState" class="hidden py-12 text-center fade-up">
+                    <div class="cyber-spinner mx-auto mb-6"></div>
+                    <p class="text-xl text-gray-300 tracking-wide">Analyzing video...</p>
+                    <p class="text-cyan-400 mt-2">Please wait a moment</p>
+                </div>
+
+                <!-- Error State -->
+                <div id="errorState" class="hidden py-6 fade-up">
+                    <div class="bg-red-500/20 border border-red-500/40 rounded-2xl p-5 flex items-center gap-4">
+                        <div class="w-12 h-12 bg-red-500/30 rounded-full flex items-center justify-center">
+                            <i class="fas fa-exclamation-triangle text-red-400 text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-red-400 font-semibold text-lg">Error</p>
+                            <span id="errorMessage" class="text-red-200"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Result Card -->
+                <div id="resultCard" class="hidden fade-up">
+                    <div class="border-t border-cyan-500/20 pt-8 mt-6">
+                        <!-- Video Preview -->
+                        <div class="flex flex-col lg:flex-row gap-6 mb-8">
+                            <div class="relative group lg:w-72 shrink-0">
+                                <img id="videoThumbnail" src="" alt="Thumbnail" class="w-full h-44 object-cover rounded-2xl border border-cyan-500/30">
+                                <div class="absolute inset-0 bg-black/60 flex items-center justify-center rounded-2xl opacity-0 group-hover:opacity-100 transition">
+                                    <div class="w-16 h-16 bg-cyan-500/30 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-play text-3xl text-cyan-400"></i>
+                                    </div>
+                                </div>
+                                <span id="videoDuration" class="absolute bottom-3 right-3 bg-black/80 border border-cyan-500/40 px-3 py-1 rounded-lg text-sm font-bold text-cyan-400"></span>
+                            </div>
+                            
+                            <div class="flex-1">
+                                <h3 id="videoTitle" class="font-bold text-xl mb-2 line-clamp-2 text-white"></h3>
+                                <p id="videoAuthor" class="text-gray-400 mb-4 flex items-center gap-2">
+                                    <i class="fas fa-user-circle"></i>
+                                    <span id="authorName"></span>
+                                </p>
+                                <div class="flex flex-wrap gap-3 text-sm">
+                                    <span class="bg-cyan-500/20 border border-cyan-500/30 px-3 py-1 rounded-full text-cyan-400">
+                                        <i class="fas fa-eye mr-1"></i> <span id="viewCount">1.2M views</span>
+                                    </span>
+                                    <span class="bg-purple-500/20 border border-purple-500/30 px-3 py-1 rounded-full text-purple-400">
+                                        <i class="fas fa-heart mr-1"></i> <span id="likeCount">50K likes</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Download Options -->
+                        <div class="space-y-4">
+                            <h4 class="text-lg font-bold text-gray-300 flex items-center gap-2">
+                                <i class="fas fa-download text-cyan-400"></i>
+                                Choose Download Format
+                            </h4>
+                            
+                            <!-- Video + Audio -->
+                            <div class="bg-gradient-to-r from-cyan-500/10 to-transparent border border-cyan-500/20 rounded-2xl p-4">
+                                <p class="text-cyan-400 font-semibold mb-3 flex items-center gap-2">
+                                    <i class="fas fa-film"></i> VIDEO + AUDIO
+                                </p>
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                    <button onclick="download('2160p')" class="dl-btn bg-gradient-to-r from-red-600 to-red-700 px-4 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
+                                        <i class="fas fa-crown text-yellow-400"></i> 4K
+                                    </button>
+                                    <button onclick="download('1080p')" class="dl-btn bg-gradient-to-r from-purple-600 to-purple-700 px-4 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
+                                        <i class="fas fa-star"></i> 1080p
+                                    </button>
+                                    <button onclick="download('720p')" class="dl-btn bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
+                                        <i class="fas fa-video"></i> 720p
+                                    </button>
+                                    <button onclick="download('480p')" class="dl-btn bg-gradient-to-r from-indigo-600 to-indigo-700 px-4 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
+                                        <i class="fas fa-video"></i> 480p
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Audio Only -->
+                            <div class="bg-gradient-to-r from-green-500/10 to-transparent border border-green-500/20 rounded-2xl p-4">
+                                <p class="text-green-400 font-semibold mb-3 flex items-center gap-2">
+                                    <i class="fas fa-music"></i> AUDIO ONLY
+                                </p>
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                    <button onclick="download('mp3-320')" class="dl-btn bg-gradient-to-r from-green-600 to-green-700 px-4 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
+                                        <i class="fas fa-headphones"></i> MP3 320k
+                                    </button>
+                                    <button onclick="download('mp3-192')" class="dl-btn bg-gradient-to-r from-emerald-600 to-emerald-700 px-4 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
+                                        <i class="fas fa-headphones"></i> MP3 192k
+                                    </button>
+                                    <button onclick="download('mp3-128')" class="dl-btn bg-gradient-to-r from-teal-600 to-teal-700 px-4 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
+                                        <i class="fas fa-headphones"></i> MP3 128k
+                                    </button>
+                                    <button onclick="download('m4a')" class="dl-btn bg-gradient-to-r from-lime-600 to-lime-700 px-4 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
+                                        <i class="fas fa-music"></i> M4A
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Video Only (No Audio) -->
+                            <div class="bg-gradient-to-r from-orange-500/10 to-transparent border border-orange-500/20 rounded-2xl p-4">
+                                <p class="text-orange-400 font-semibold mb-3 flex items-center gap-2">
+                                    <i class="fas fa-volume-xmark"></i> VIDEO ONLY (NO AUDIO)
+                                </p>
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                    <button onclick="download('video-2160p')" class="dl-btn bg-gradient-to-r from-orange-600 to-orange-700 px-4 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
+                                        <i class="fas fa-film"></i> 4K
+                                    </button>
+                                    <button onclick="download('video-1080p')" class="dl-btn bg-gradient-to-r from-amber-600 to-amber-700 px-4 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
+                                        <i class="fas fa-film"></i> 1080p
+                                    </button>
+                                    <button onclick="download('video-720p')" class="dl-btn bg-gradient-to-r from-yellow-600 to-yellow-700 px-4 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
+                                        <i class="fas fa-film"></i> 720p
+                                    </button>
+                                    <button onclick="download('video-480p')" class="dl-btn bg-gradient-to-r from-orange-500 to-orange-600 px-4 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
+                                        <i class="fas fa-film"></i> 480p
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Supported Platforms -->
+            <div class="glass-card rounded-3xl p-6 mb-10 transition-all duration-500">
+                <h2 class="text-center text-gray-400 font-bold tracking-widest mb-6">SUPPORTED PLATFORMS</h2>
+                <div class="grid grid-cols-4 md:grid-cols-8 gap-4">
+                    <div class="platform-icon flex flex-col items-center gap-2 p-3 cursor-pointer text-red-500">
+                        <i class="fab fa-youtube text-3xl"></i>
+                        <span class="text-xs text-gray-400">YouTube</span>
+                    </div>
+                    <div class="platform-icon flex flex-col items-center gap-2 p-3 cursor-pointer text-pink-400">
+                        <i class="fab fa-tiktok text-3xl"></i>
+                        <span class="text-xs text-gray-400">TikTok</span>
+                    </div>
+                    <div class="platform-icon flex flex-col items-center gap-2 p-3 cursor-pointer text-pink-500">
+                        <i class="fab fa-instagram text-3xl"></i>
+                        <span class="text-xs text-gray-400">Instagram</span>
+                    </div>
+                    <div class="platform-icon flex flex-col items-center gap-2 p-3 cursor-pointer text-blue-500">
+                        <i class="fab fa-facebook text-3xl"></i>
+                        <span class="text-xs text-gray-400">Facebook</span>
+                    </div>
+                    <div class="platform-icon flex flex-col items-center gap-2 p-3 cursor-pointer text-sky-400">
+                        <i class="fab fa-twitter text-3xl"></i>
+                        <span class="text-xs text-gray-400">Twitter</span>
+                    </div>
+                    <div class="platform-icon flex flex-col items-center gap-2 p-3 cursor-pointer text-cyan-400">
+                        <i class="fab fa-vimeo-v text-3xl"></i>
+                        <span class="text-xs text-gray-400">Vimeo</span>
+                    </div>
+                    <div class="platform-icon flex flex-col items-center gap-2 p-3 cursor-pointer text-purple-500">
+                        <i class="fab fa-twitch text-3xl"></i>
+                        <span class="text-xs text-gray-400">Twitch</span>
+                    </div>
+                    <div class="platform-icon flex flex-col items-center gap-2 p-3 cursor-pointer text-cyan-400">
+                        <i class="fas fa-infinity text-3xl"></i>
+                        <span class="text-xs text-gray-400">1000+</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features Grid -->
+            <div class="grid md:grid-cols-4 gap-4 mb-10">
+                <div class="glass-card rounded-2xl p-5 text-center transition-all duration-500 hover:scale-105">
+                    <div class="w-14 h-14 bg-gradient-to-br from-cyan-500/30 to-blue-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-rocket text-2xl text-cyan-400"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-1">Lightning Fast</h3>
+                    <p class="text-gray-400 text-sm">High-speed servers worldwide</p>
+                </div>
+                <div class="glass-card rounded-2xl p-5 text-center transition-all duration-500 hover:scale-105">
+                    <div class="w-14 h-14 bg-gradient-to-br from-green-500/30 to-emerald-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-user-slash text-2xl text-green-400"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-1">No Sign Up</h3>
+                    <p class="text-gray-400 text-sm">Completely anonymous</p>
+                </div>
+                <div class="glass-card rounded-2xl p-5 text-center transition-all duration-500 hover:scale-105">
+                    <div class="w-14 h-14 bg-gradient-to-br from-purple-500/30 to-pink-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-infinity text-2xl text-purple-400"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-1">Unlimited</h3>
+                    <p class="text-gray-400 text-sm">No download limits</p>
+                </div>
+                <div class="glass-card rounded-2xl p-5 text-center transition-all duration-500 hover:scale-105">
+                    <div class="w-14 h-14 bg-gradient-to-br from-orange-500/30 to-red-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-shield-halved text-2xl text-orange-400"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-1">100% Safe</h3>
+                    <p class="text-gray-400 text-sm">No viruses or malware</p>
+                </div>
+            </div>
+
+            <!-- Backend Code Section -->
+            <div class="glass-card rounded-3xl p-6 transition-all duration-500">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-bold flex items-center gap-3">
+                        <i class="fab fa-python text-yellow-400 text-2xl"></i>
+                        Backend Code (Flask + yt-dlp)
+                    </h2>
+                    <button onclick="copyBackendCode()" class="bg-cyan-500/20 hover:bg-cyan-500/40 text-cyan-400 px-4 py-2 rounded-xl transition flex items-center gap-2">
+                        <i class="fas fa-copy"></i>
+                        <span>Copy Code</span>
+                    </button>
+                </div>
+                
+                <!-- Tabs -->
+                <div class="flex gap-2 mb-4 overflow-x-auto pb-2">
+                    <button onclick="showTab('app')" id="tab-app" class="tab-active px-4 py-2 rounded-xl border border-cyan-500/30 text-sm font-semibold whitespace-nowrap transition">
+                        app.py
+                    </button>
+                    <button onclick="showTab('requirements')" id="tab-requirements" class="px-4 py-2 rounded-xl border border-gray-700 text-gray-400 text-sm font-semibold whitespace-nowrap transition hover:border-cyan-500/30">
+                        requirements.txt
+                    </button>
+                    <button onclick="showTab('dockerfile')" id="tab-dockerfile" class="px-4 py-2 rounded-xl border border-gray-700 text-gray-400 text-sm font-semibold whitespace-nowrap transition hover:border-cyan-500/30">
+                        Dockerfile
+                    </button>
+                    <button onclick="showTab('deploy')" id="tab-deploy" class="px-4 py-2 rounded-xl border border-gray-700 text-gray-400 text-sm font-semibold whitespace-nowrap transition hover:border-cyan-500/30">
+                        Deploy Guide
+                    </button>
+                </div>
+
+                <!-- Code Blocks -->
+                <div id="code-app" class="bg-black/50 rounded-2xl p-4 overflow-x-auto">
+                    <pre class="text-sm text-gray-300 font-mono whitespace-pre"><code><span class="text-purple-400">from</span> flask <span class="text-purple-400">import</span> Flask, request, jsonify, send_file
+<span class="text-purple-400">from</span> flask_cors <span class="text-purple-400">import</span> CORS
+<span class="text-purple-400">import</span> yt_dlp
+<span class="text-purple-400">import</span> os, uuid, threading, time, re
+
+app = Flask(__name__)
+CORS(app)
+
+DOWNLOAD_FOLDER = <span class="text-green-400">'/tmp/downloads'</span>
+os.makedirs(DOWNLOAD_FOLDER, exist_ok=<span class="text-cyan-400">True</span>)
+
+<span class="text-purple-400">def</span> <span class="text-yellow-400">cleanup</span>():
+    <span class="text-purple-400">while True</span>:
+        time.sleep(<span class="text-cyan-400">300</span>)
+        <span class="text-purple-400">for</span> f <span class="text-purple-400">in</span> os.listdir(DOWNLOAD_FOLDER):
+            path = os.path.join(DOWNLOAD_FOLDER, f)
+            <span class="text-purple-400">if</span> os.path.getmtime(path) < time.time() - <span class="text-cyan-400">300</span>:
+                <span class="text-purple-400">try</span>: os.remove(path)
+                <span class="text-purple-400">except</span>: <span class="text-purple-400">pass</span>
+
+threading.Thread(target=cleanup, daemon=<span class="text-cyan-400">True</span>).start()
+
+<span class="text-purple-400">def</span> <span class="text-yellow-400">sanitize</span>(name):
+    <span class="text-purple-400">return</span> re.sub(r<span class="text-green-400">'[\\/*?:"<>|]'</span>, <span class="text-green-400">''</span>, name)[:<span class="text-cyan-400">100</span>]
+
+<span class="text-orange-400">@app.route</span>(<span class="text-green-400">'/'</span>)
+<span class="text-purple-400">def</span> <span class="text-yellow-400">home</span>():
+    <span class="text-purple-400">return</span> jsonify({<span class="text-green-400">'status'</span>: <span class="text-green-400">'VidGrab API Running'</span>, <span class="text-green-400">'endpoints'</span>: [<span class="text-green-400">'/api/info'</span>, <span class="text-green-400">'/api/download'</span>]})
+
+<span class="text-orange-400">@app.route</span>(<span class="text-green-400">'/api/info'</span>, methods=[<span class="text-green-400">'POST'</span>])
+<span class="text-purple-400">def</span> <span class="text-yellow-400">get_info</span>():
+    url = request.json.get(<span class="text-green-400">'url'</span>)
+    <span class="text-purple-400">if not</span> url:
+        <span class="text-purple-400">return</span> jsonify({<span class="text-green-400">'error'</span>: <span class="text-green-400">'URL required'</span>}), <span class="text-cyan-400">400</span>
+    <span class="text-purple-400">try</span>:
+        <span class="text-purple-400">with</span> yt_dlp.YoutubeDL({<span class="text-green-400">'quiet'</span>: <span class="text-cyan-400">True</span>}) <span class="text-purple-400">as</span> ydl:
+            info = ydl.extract_info(url, download=<span class="text-cyan-400">False</span>)
+            <span class="text-purple-400">return</span> jsonify({
+                <span class="text-green-400">'title'</span>: info.get(<span class="text-green-400">'title'</span>),
+                <span class="text-green-400">'thumbnail'</span>: info.get(<span class="text-green-400">'thumbnail'</span>),
+                <span class="text-green-400">'duration'</span>: info.get(<span class="text-green-400">'duration'</span>),
+                <span class="text-green-400">'uploader'</span>: info.get(<span class="text-green-400">'uploader'</span>),
+                <span class="text-green-400">'view_count'</span>: info.get(<span class="text-green-400">'view_count'</span>),
+                <span class="text-green-400">'like_count'</span>: info.get(<span class="text-green-400">'like_count'</span>)
+            })
+    <span class="text-purple-400">except</span> Exception <span class="text-purple-400">as</span> e:
+        <span class="text-purple-400">return</span> jsonify({<span class="text-green-400">'error'</span>: str(e)}), <span class="text-cyan-400">500</span>
+
+<span class="text-orange-400">@app.route</span>(<span class="text-green-400">'/api/download'</span>, methods=[<span class="text-green-400">'POST'</span>])
+<span class="text-purple-400">def</span> <span class="text-yellow-400">download</span>():
+    url = request.json.get(<span class="text-green-400">'url'</span>)
+    fmt = request.json.get(<span class="text-green-400">'format'</span>, <span class="text-green-400">'720p'</span>)
+    file_id = str(uuid.uuid4())
+    out = os.path.join(DOWNLOAD_FOLDER, file_id)
+    
+    <span class="text-gray-500"># Audio formats</span>
+    <span class="text-purple-400">if</span> fmt.startswith(<span class="text-green-400">'mp3'</span>):
+        br = fmt.split(<span class="text-green-400">'-'</span>)[<span class="text-cyan-400">1</span>] <span class="text-purple-400">if</span> <span class="text-green-400">'-'</span> <span class="text-purple-400">in</span> fmt <span class="text-purple-400">else</span> <span class="text-green-400">'192'</span>
+        opts = {<span class="text-green-400">'format'</span>: <span class="text-green-400">'bestaudio'</span>, <span class="text-green-400">'outtmpl'</span>: out+<span class="text-green-400">'.%(ext)s'</span>,
+                <span class="text-green-400">'postprocessors'</span>: [{<span class="text-green-400">'key'</span>: <span class="text-green-400">'FFmpegExtractAudio'</span>, <span class="text-green-400">'preferredcodec'</span>: <span class="text-green-400">'mp3'</span>, <span class="text-green-400">'preferredquality'</span>: br}]}
+    <span class="text-purple-400">elif</span> fmt == <span class="text-green-400">'m4a'</span>:
+        opts = {<span class="text-green-400">'format'</span>: <span class="text-green-400">'bestaudio[ext=m4a]/bestaudio'</span>, <span class="text-green-400">'outtmpl'</span>: out+<span class="text-green-400">'.%(ext)s'</span>}
+    <span class="text-gray-500"># Video only (no audio)</span>
+    <span class="text-purple-400">elif</span> fmt.startswith(<span class="text-green-400">'video-'</span>):
+        q = fmt.replace(<span class="text-green-400">'video-'</span>,<span class="text-green-400">''</span>).replace(<span class="text-green-400">'p'</span>,<span class="text-green-400">''</span>)
+        opts = {<span class="text-green-400">'format'</span>: f<span class="text-green-400">'bestvideo[height<={q}]'</span>, <span class="text-green-400">'outtmpl'</span>: out+<span class="text-green-400">'.%(ext)s'</span>}
+    <span class="text-gray-500"># Video + Audio</span>
+    <span class="text-purple-400">else</span>:
+        q = fmt.replace(<span class="text-green-400">'p'</span>,<span class="text-green-400">''</span>)
+        opts = {<span class="text-green-400">'format'</span>: f<span class="text-green-400">'bestvideo[height<={q}]+bestaudio/best[height<={q}]/best'</span>,
+                <span class="text-green-400">'outtmpl'</span>: out+<span class="text-green-400">'.%(ext)s'</span>, <span class="text-green-400">'merge_output_format'</span>: <span class="text-green-400">'mp4'</span>}
+    
+    <span class="text-purple-400">try</span>:
+        <span class="text-purple-400">with</span> yt_dlp.YoutubeDL(opts) <span class="text-purple-400">as</span> ydl:
+            info = ydl.extract_info(url)
+            <span class="text-purple-400">for</span> f <span class="text-purple-400">in</span> os.listdir(DOWNLOAD_FOLDER):
+                <span class="text-purple-400">if</span> f.startswith(file_id):
+                    ext = f.split(<span class="text-green-400">'.'</span>)[-<span class="text-cyan-400">1</span>]
+                    name = sanitize(info.get(<span class="text-green-400">'title'</span>,<span class="text-green-400">'video'</span>)) + <span class="text-green-400">'.'</span> + ext
+                    <span class="text-purple-400">return</span> send_file(os.path.join(DOWNLOAD_FOLDER,f), as_attachment=<span class="text-cyan-400">True</span>, download_name=name)
+        <span class="text-purple-400">return</span> jsonify({<span class="text-green-400">'error'</span>: <span class="text-green-400">'File not found'</span>}), <span class="text-cyan-400">404</span>
+    <span class="text-purple-400">except</span> Exception <span class="text-purple-400">as</span> e:
+        <span class="text-purple-400">return</span> jsonify({<span class="text-green-400">'error'</span>: str(e)}), <span class="text-cyan-400">500</span>
+
+<span class="text-purple-400">if</span> __name__ == <span class="text-green-400">'__main__'</span>:
+    app.run(host=<span class="text-green-400">'0.0.0.0'</span>, port=int(os.environ.get(<span class="text-green-400">'PORT'</span>, <span class="text-cyan-400">5000</span>)))</code></pre>
+                </div>
+
+                <div id="code-requirements" class="hidden bg-black/50 rounded-2xl p-4 overflow-x-auto">
+                    <pre class="text-sm text-gray-300 font-mono"><code>flask==3.0.0
+flask-cors==4.0.0
+yt-dlp
+gunicorn==21.2.0</code></pre>
+                </div>
+
+                <div id="code-dockerfile" class="hidden bg-black/50 rounded-2xl p-4 overflow-x-auto">
+                    <pre class="text-sm text-gray-300 font-mono"><code><span class="text-purple-400">FROM</span> python:3.11-slim
+
+<span class="text-purple-400">WORKDIR</span> /app
+
+<span class="text-gray-500"># Install ffmpeg</span>
+<span class="text-purple-400">RUN</span> apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
+
+<span class="text-gray-500"># Copy requirements first for caching</span>
+<span class="text-purple-400">COPY</span> requirements.txt .
+<span class="text-purple-400">RUN</span> pip install --no-cache-dir -r requirements.txt
+
+<span class="text-gray-500"># Copy app</span>
+<span class="text-purple-400">COPY</span> . .
+
+<span class="text-gray-500"># Expose port</span>
+<span class="text-purple-400">EXPOSE</span> 5000
+
+<span class="text-gray-500"># Run with gunicorn</span>
+<span class="text-purple-400">CMD</span> [<span class="text-green-400">"gunicorn"</span>, <span class="text-green-400">"--bind"</span>, <span class="text-green-400">"0.0.0.0:5000"</span>, <span class="text-green-400">"app:app"</span>]</code></pre>
+                </div>
+
+                <div id="code-deploy" class="hidden bg-black/50 rounded-2xl p-4 text-gray-300">
+                    <h4 class="text-cyan-400 font-bold mb-3 flex items-center gap-2">
+                        <i class="fas fa-rocket"></i> Deploy to Render (Free) - Using Docker
+                    </h4>
+                    <div class="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded-xl text-red-300 text-sm">
+                        <i class="fas fa-exclamation-circle mr-2"></i>
+                        <strong>Important:</strong> You MUST use Docker deployment for ffmpeg support!
+                    </div>
+                    <ol class="space-y-3 text-sm">
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 bg-cyan-500/30 rounded-full flex items-center justify-center text-cyan-400 font-bold shrink-0">1</span>
+                            <span>Create a GitHub repo with these 3 files:
+                                <div class="mt-2 space-y-1">
+                                    <code class="bg-black/50 px-2 py-1 rounded block">app.py</code>
+                                    <code class="bg-black/50 px-2 py-1 rounded block">requirements.txt</code>
+                                    <code class="bg-black/50 px-2 py-1 rounded block">Dockerfile</code>
+                                </div>
+                            </span>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 bg-cyan-500/30 rounded-full flex items-center justify-center text-cyan-400 font-bold shrink-0">2</span>
+                            <span>Go to <a href="https://render.com" target="_blank" class="text-cyan-400 underline">render.com</a> → <strong>New Web Service</strong></span>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 bg-cyan-500/30 rounded-full flex items-center justify-center text-cyan-400 font-bold shrink-0">3</span>
+                            <span>Connect your GitHub repo</span>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 bg-cyan-500/30 rounded-full flex items-center justify-center text-cyan-400 font-bold shrink-0">4</span>
+                            <span>Select <strong>"Docker"</strong> as the Environment (NOT Python!)</span>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 bg-cyan-500/30 rounded-full flex items-center justify-center text-cyan-400 font-bold shrink-0">5</span>
+                            <span>Leave Build Command and Start Command <strong>empty</strong> (Docker handles it)</span>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 bg-cyan-500/30 rounded-full flex items-center justify-center text-cyan-400 font-bold shrink-0">6</span>
+                            <span>Click <strong>"Create Web Service"</strong> and wait for deploy</span>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 bg-green-500/30 rounded-full flex items-center justify-center text-green-400 font-bold shrink-0">✓</span>
+                            <span>Your API will be at: <code class="bg-black/50 px-2 py-1 rounded text-green-400">https://your-app.onrender.com</code></span>
+                        </li>
+                    </ol>
+                    <div class="mt-4 p-3 bg-yellow-500/20 border border-yellow-500/30 rounded-xl text-yellow-300 text-sm">
+                        <i class="fas fa-lightbulb mr-2"></i>
+                        <strong>Note:</strong> Update the <code>API_BASE</code> variable in the frontend JavaScript with your Render URL!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-cyan-500/20 py-8 mt-12 relative z-10">
+        <div class="max-w-6xl mx-auto px-4 text-center">
+            <p class="logo-text text-xl font-bold mb-2">VIDGRAB PRO</p>
+            <p class="text-gray-500 text-sm">
+                Free video downloader for personal use only. We do not host any copyrighted content.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // ========== CONFIGURATION ==========
+        // Change this to your Render backend URL after deployment
+        const API_BASE = 'https://your-backend.onrender.com';
+        // ===================================
+
+        // Create floating particles
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 15 + 's';
+            particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+            particlesContainer.appendChild(particle);
+        }
+
+        const urlInput = document.getElementById('urlInput');
+        const platformBadge = document.getElementById('platformBadge');
+        const platformIcon = document.getElementById('platformIcon');
+        const platformText = document.getElementById('platformText');
+
+        const platforms = {
+            'youtube.com': { name: 'YouTube', icon: 'fab fa-youtube', color: 'text-red-500' },
+            'youtu.be': { name: 'YouTube', icon: 'fab fa-youtube', color: 'text-red-500' },
+            'tiktok.com': { name: 'TikTok', icon: 'fab fa-tiktok', color: 'text-pink-400' },
+            'instagram.com': { name: 'Instagram', icon: 'fab fa-instagram', color: 'text-pink-500' },
+            'facebook.com': { name: 'Facebook', icon: 'fab fa-facebook', color: 'text-blue-500' },
+            'fb.watch': { name: 'Facebook', icon: 'fab fa-facebook', color: 'text-blue-500' },
+            'twitter.com': { name: 'Twitter', icon: 'fab fa-twitter', color: 'text-sky-400' },
+            'x.com': { name: 'X (Twitter)', icon: 'fab fa-twitter', color: 'text-sky-400' },
+            'vimeo.com': { name: 'Vimeo', icon: 'fab fa-vimeo-v', color: 'text-cyan-400' },
+            'twitch.tv': { name: 'Twitch', icon: 'fab fa-twitch', color: 'text-purple-500' },
+        };
+
+        // Detect platform
+        urlInput.addEventListener('input', function() {
+            const url = this.value.toLowerCase();
+            let detected = null;
+
+            for (const [domain, info] of Object.entries(platforms)) {
+                if (url.includes(domain)) {
+                    detected = info;
+                    break;
+                }
+            }
+
+            if (detected) {
+                platformBadge.classList.remove('hidden');
+                platformIcon.className = `${detected.icon} ${detected.color} text-2xl`;
+                platformText.textContent = `${detected.name} Detected`;
+            } else {
+                platformBadge.classList.add('hidden');
+            }
+        });
+
+        // Paste from clipboard
+        async function pasteFromClipboard() {
+            try {
+                const text = await navigator.clipboard.readText();
+                urlInput.value = text;
+                urlInput.dispatchEvent(new Event('input'));
+            } catch (err) {
+                alert('Could not access clipboard. Please paste manually.');
+            }
+        }
+
+        // Fetch video info
+        async function fetchVideo() {
+            const url = urlInput.value.trim();
+            
+            if (!url) {
+                showError('Please enter a video URL');
+                return;
+            }
+
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                showError('Please enter a valid URL starting with http:// or https://');
+                return;
+            }
+
+            hideAll();
+            document.getElementById('loadingState').classList.remove('hidden');
+
+            // Check if backend is configured
+            if (API_BASE.includes('your-backend')) {
+                // Demo mode
+                setTimeout(() => {
+                    document.getElementById('loadingState').classList.add('hidden');
+                    showDemoResult(url);
+                }, 2000);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/api/info`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    showResult(data);
+                }
+            } catch (err) {
+                showError('Could not connect to server. Please try again.');
+            }
+        }
+
+        function hideAll() {
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('errorState').classList.add('hidden');
+            document.getElementById('resultCard').classList.add('hidden');
+        }
+
+        function showError(message) {
+            hideAll();
+            document.getElementById('errorState').classList.remove('hidden');
+            document.getElementById('errorMessage').textContent = message;
+        }
+
+        function formatDuration(seconds) {
+            if (!seconds) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function formatCount(num) {
+            if (!num) return '0';
+            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+            return num.toString();
+        }
+
+        function showResult(data) {
+            document.getElementById('videoTitle').textContent = data.title || 'Untitled Video';
+            document.getElementById('authorName').textContent = data.uploader || 'Unknown';
+            document.getElementById('videoDuration').textContent = formatDuration(data.duration);
+            document.getElementById('videoThumbnail').src = data.thumbnail || 'https://picsum.photos/400/225?random=' + Date.now();
+            document.getElementById('viewCount').textContent = formatCount(data.view_count) + ' views';
+            document.getElementById('likeCount').textContent = formatCount(data.like_count) + ' likes';
+            
+            document.getElementById('resultCard').classList.remove('hidden');
+        }
+
+        function showDemoResult(url) {
+            const demoData = {
+                title: 'Demo Video - Connect your Flask backend for real downloads!',
+                uploader: 'VidGrab Pro Demo',
+                duration: 185,
+                thumbnail: 'https://picsum.photos/400/225?random=' + Date.now(),
+                view_count: 1250000,
+                like_count: 48000
+            };
+            showResult(demoData);
+        }
+
+        async function download(format) {
+            const url = urlInput.value.trim();
+            
+            if (API_BASE.includes('your-backend')) {
+                alert('⚠️ Demo Mode\n\nTo enable real downloads:\n1. Deploy the Flask backend to Render\n2. Update the API_BASE variable in JavaScript\n\nScroll down to see the backend code!');
+                return;
+            }
+
+            // Create download request
+            try {
+                const response = await fetch(`${API_BASE}/api/download`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url, format })
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const downloadUrl = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = downloadUrl;
+                    a.download = `video_${format}.${format.includes('mp3') || format === 'm4a' ? format.replace('-', '_') : 'mp4'}`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(downloadUrl);
+                } else {
+                    const data = await response.json();
+                    alert('Download failed: ' + (data.error || 'Unknown error'));
+                }
+            } catch (err) {
+                alert('Download failed. Please try again.');
+            }
+        }
+
+        // Tab switching
+        function showTab(tab) {
+            const tabs = ['app', 'requirements', 'dockerfile', 'deploy'];
+            tabs.forEach(t => {
+                document.getElementById(`code-${t}`).classList.add('hidden');
+                document.getElementById(`tab-${t}`).classList.remove('tab-active');
+                document.getElementById(`tab-${t}`).classList.add('border-gray-700', 'text-gray-400');
+            });
+            document.getElementById(`code-${tab}`).classList.remove('hidden');
+            document.getElementById(`tab-${tab}`).classList.add('tab-active');
+            document.getElementById(`tab-${tab}`).classList.remove('border-gray-700', 'text-gray-400');
+        }
+
+        // Copy backend code
+        function copyBackendCode() {
+            const code = `from flask import Flask, request, jsonify, send_file
+from flask_cors import CORS
+import yt_dlp
+import os, uuid, threading, time, re
+
+app = Flask(__name__)
+CORS(app)
+
+DOWNLOAD_FOLDER = '/tmp/downloads'
+os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
+
+def cleanup():
+    while True:
+        time.sleep(300)
+        for f in os.listdir(DOWNLOAD_FOLDER):
+            path = os.path.join(DOWNLOAD_FOLDER, f)
+            if os.path.getmtime(path) < time.time() - 300:
+                try: os.remove(path)
+                except: pass
+
+threading.Thread(target=cleanup, daemon=True).start()
+
+def sanitize(name):
+    return re.sub(r'[\\\\/*?:"<>|]', '', name)[:100]
+
+@app.route('/')
+def home():
+    return jsonify({'status': 'VidGrab API Running', 'endpoints': ['/api/info', '/api/download']})
+
+@app.route('/api/info', methods=['POST'])
+def get_info():
+    url = request.json.get('url')
+    if not url:
+        return jsonify({'error': 'URL required'}), 400
+    try:
+        with yt_dlp.YoutubeDL({'quiet': True}) as ydl:
+            info = ydl.extract_info(url, download=False)
+            return jsonify({
+                'title': info.get('title'),
+                'thumbnail': info.get('thumbnail'),
+                'duration': info.get('duration'),
+                'uploader': info.get('uploader'),
+                'view_count': info.get('view_count'),
+                'like_count': info.get('like_count')
+            })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/download', methods=['POST'])
+def download():
+    url = request.json.get('url')
+    fmt = request.json.get('format', '720p')
+    file_id = str(uuid.uuid4())
+    out = os.path.join(DOWNLOAD_FOLDER, file_id)
+    
+    # Audio formats
+    if fmt.startswith('mp3'):
+        br = fmt.split('-')[1] if '-' in fmt else '192'
+        opts = {'format': 'bestaudio', 'outtmpl': out+'.%(ext)s',
+                'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': br}]}
+    elif fmt == 'm4a':
+        opts = {'format': 'bestaudio[ext=m4a]/bestaudio', 'outtmpl': out+'.%(ext)s'}
+    # Video only (no audio)
+    elif fmt.startswith('video-'):
+        q = fmt.replace('video-','').replace('p','')
+        opts = {'format': f'bestvideo[height<={q}]', 'outtmpl': out+'.%(ext)s'}
+    # Video + Audio
+    else:
+        q = fmt.replace('p','')
+        opts = {'format': f'bestvideo[height<={q}]+bestaudio/best[height<={q}]/best',
+                'outtmpl': out+'.%(ext)s', 'merge_output_format': 'mp4'}
+    
+    try:
+        with yt_dlp.YoutubeDL(opts) as ydl:
+            info = ydl.extract_info(url)
+            for f in os.listdir(DOWNLOAD_FOLDER):
+                if f.startswith(file_id):
+                    ext = f.split('.')[-1]
+                    name = sanitize(info.get('title','video')) + '.' + ext
+                    return send_file(os.path.join(DOWNLOAD_FOLDER,f), as_attachment=True, download_name=name)
+        return jsonify({'error': 'File not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))`;
+            
+            navigator.clipboard.writeText(code).then(() => {
+                alert('✅ Backend code copied to clipboard!');
+            });
+        }
+
+        // Enter key to search
+        urlInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') fetchVideo();
+        });
+    </script>
+</body>
+</html>
