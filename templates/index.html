@@ -98,6 +98,15 @@
             background: linear-gradient(to right, var(--primary), var(--secondary));
         }
 
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+            box-shadow: 0 0 10px currentColor;
+        }
+
         .platform-tag {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -144,13 +153,16 @@
                 <span class="text-2xl font-black tracking-tighter uppercase">Vault<span class="text-indigo-500">Pro</span></span>
             </div>
             <div class="flex items-center space-x-8">
-                <div class="hidden md:flex space-x-6 text-slate-400 font-semibold text-sm">
+                <div class="hidden md:flex items-center space-x-6 text-slate-400 font-semibold text-sm">
+                    <div class="flex items-center px-3 py-1 bg-green-500/10 text-green-400 rounded-full border border-green-500/20">
+                        <span class="status-dot bg-green-400 animate-pulse"></span>
+                        Network Active
+                    </div>
                     <a href="#" class="hover:text-white transition">Features</a>
-                    <a href="#" class="hover:text-white transition">Network</a>
                     <a href="#" class="hover:text-white transition">Status</a>
                 </div>
                 <button class="bg-white/5 hover:bg-white/10 px-5 py-2 rounded-full border border-white/10 text-sm font-bold transition">
-                    Dark Mode <i class="fas fa-moon ml-2"></i>
+                    Pro Mode <i class="fas fa-bolt ml-2 text-yellow-400"></i>
                 </button>
             </div>
         </nav>
@@ -389,19 +401,23 @@
                 return;
             }
 
-            formats.forEach(f => {
+            formats.forEach((f, index) => {
                 const card = document.createElement('div');
                 card.className = 'quality-card bg-white/5 border border-white/5 p-5 rounded-2xl flex justify-between items-center group hover:border-indigo-500/30';
+                
+                // Determine if it's high quality for the "PRO" badge
+                const isHighQuality = f.quality.includes('1080') || f.quality.includes('2160') || f.quality.includes('4k') || (index === 0 && !f.quality.includes('p'));
+                
                 card.innerHTML = `
                     <div>
                         <div class="flex items-center gap-2 mb-1">
                             <span class="text-lg font-black text-white">${f.quality}</span>
-                            ${f.quality.includes('1080') || f.quality.includes('4k') ? '<span class="text-[10px] bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 rounded font-bold">PRO</span>' : ''}
+                            ${isHighQuality ? '<span class="text-[10px] bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 rounded font-bold">ULTRA</span>' : ''}
                         </div>
-                        <div class="text-xs text-slate-500 uppercase font-bold tracking-wider">${f.ext} • ${f.size}</div>
+                        <div class="text-xs text-slate-500 uppercase font-bold tracking-wider">${f.ext.toUpperCase()} • ${f.size}</div>
                     </div>
-                    <a href="${f.url}" target="_blank" download class="w-12 h-12 flex items-center justify-center bg-indigo-600/10 group-hover:bg-indigo-600 rounded-xl transition-all duration-300">
-                        <i class="fas fa-arrow-down text-indigo-500 group-hover:text-white"></i>
+                    <a href="${f.url}" target="_blank" class="w-12 h-12 flex items-center justify-center bg-indigo-600/10 group-hover:bg-indigo-600 rounded-xl transition-all duration-300">
+                        <i class="fas fa-download text-indigo-500 group-hover:text-white"></i>
                     </a>
                 `;
                 grid.appendChild(card);
