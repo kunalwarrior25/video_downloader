@@ -12,8 +12,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Ensure yt-dlp is up to date
-RUN pip install -U yt-dlp
+# Ensure yt-dlp is up to date and install its dependencies
+RUN pip install -U yt-dlp pycryptodomex
 
 # Set default port
 ENV PORT=10000
