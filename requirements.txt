@@ -6,3 +6,5 @@ pycryptodomex
 brotli
 websockets
 certifi
+playwright
+scapy
