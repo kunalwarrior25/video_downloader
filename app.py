@@ -196,7 +196,7 @@ def get_video_info(url):
     platform_name = "YouTube" if is_youtube else "TikTok" if is_tiktok else "Twitter" if is_twitter else "Instagram" if is_instagram else "Facebook" if is_facebook else "Other"
     logger.info(f"Detected platform: {platform_name}")
     
-    # Base extraction options
+    # Base extraction options - OPTIMIZED FOR GETTING FORMATS
     ydl_opts = {
         'quiet': True,
         'no_warnings': True,
@@ -205,6 +205,8 @@ def get_video_info(url):
         'ignoreerrors': False,
         'socket_timeout': 30,
         'retries': 5,
+        'format': 'best/bestvideo+bestaudio',
+        'listformats': False,
         'headers': {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
@@ -243,12 +245,14 @@ def get_video_info(url):
             info = ydl.extract_info(url, download=False)
         if info:
             logger.info(f"[Attempt 1] SUCCESS! Title: {info.get('title', 'Unknown')}")
+            formats = info.get('formats') or []
+            logger.info(f"[Attempt 1] Found {len(formats)} formats")
     except Exception as e:
         last_error = str(e)
         logger.warning(f"[Attempt 1] Failed: {last_error[:100]}")
     
-    # Attempt 2: Simplified options
-    if not info:
+    # Attempt 2: Simplified options (if first attempt got no formats)
+    if not info or not info.get('formats'):
         try:
             logger.info("[Attempt 2] Trying simplified options...")
             simple_opts = {
@@ -263,19 +267,22 @@ def get_video_info(url):
                     }
                 }
             }
+            if IS_LOCAL:
+                simple_opts['cookiesfrombrowser'] = ('chrome',)
+            
             with yt_dlp.YoutubeDL(simple_opts) as ydl:
                 info = ydl.extract_info(url, download=False)
             if info:
-                logger.info(f"[Attempt 2] SUCCESS!")
+                logger.info(f"[Attempt 2] SUCCESS! Found {len(info.get('formats', []))} formats")
         except Exception as e:
             last_error = str(e)
             logger.warning(f"[Attempt 2] Failed: {last_error[:100]}")
 
     # Attempt 3: Playwright browser automation
-    if not info and is_youtube:
+    if not info or not info.get('formats'):
         logger.info("[Attempt 3] Trying Playwright browser automation...")
         playwright_result = extract_with_playwright(url)
-        if playwright_result:
+        if playwright_result and (playwright_result.get('normal') or playwright_result.get('audio') or playwright_result.get('video')):
             return playwright_result
 
     # Handle failure
@@ -292,7 +299,20 @@ def get_video_info(url):
     
     # Process formats from yt-dlp
     formats = info.get('formats') or []
-    logger.info(f"Found {len(formats)} total formats")
+    logger.info(f"Processing {len(formats)} total formats")
+    
+    # If no formats but we have info, try to get the URL directly
+    if not formats and info.get('url'):
+        logger.info("No formats list, but direct URL found")
+        formats = [{
+            'url': info.get('url'),
+            'ext': info.get('ext', 'mp4'),
+            'height': info.get('height'),
+            'format_note': info.get('format_note', 'Best'),
+            'vcodec': 'h264',
+            'acodec': 'aac',
+            'filesize': info.get('filesize')
+        }]
     
     normal_map = {}
     audio_map = {}
@@ -308,6 +328,7 @@ def get_video_info(url):
             
         ext = f.get('ext', 'mp4')
         res = f.get('height')
+        format_note = f.get('format_note', '')
         filesize = f.get('filesize') or f.get('filesize_approx') or 0
         filesize_mb = round(filesize / (1024 * 1024), 1) if filesize else None
         size_str = f'{filesize_mb} MB' if filesize_mb else "Stream"
@@ -318,9 +339,11 @@ def get_video_info(url):
         has_video = vcodec != 'none'
         has_audio = acodec != 'none'
         
+        logger.debug(f"Format: res={res}, ext={ext}, vcodec={vcodec}, acodec={acodec}, note={format_note}")
+        
         # Full Video (Video + Audio)
         if has_video and has_audio:
-            q_key = f"{res}p" if res else "Auto"
+            q_key = f"{res}p" if res else format_note or "Auto"
             if q_key not in normal_map or (filesize or 0) > normal_map[q_key].get('_size', 0):
                 normal_map[q_key] = {
                     'quality': q_key, 'ext': ext, 'size': size_str,
@@ -330,7 +353,7 @@ def get_video_info(url):
         # Audio Only
         elif has_audio and not has_video:
             abr = f.get('abr') or f.get('tbr') or 0
-            q_key = f'{int(abr)}kbps' if abr else 'Audio'
+            q_key = f'{int(abr)}kbps' if abr else format_note or 'Audio'
             if q_key not in audio_map or (abr or 0) > audio_map[q_key].get('_abr', 0):
                 audio_map[q_key] = {
                     'quality': q_key, 'ext': ext, 'size': size_str,
@@ -339,7 +362,7 @@ def get_video_info(url):
         
         # Video Only (No Audio)
         elif has_video and not has_audio:
-            q_key = f"{res}p" if res else "Video"
+            q_key = f"{res}p" if res else format_note or "Video"
             if q_key not in video_map or (filesize or 0) > video_map[q_key].get('_size', 0):
                 video_map[q_key] = {
                     'quality': q_key, 'ext': ext, 'size': size_str,
@@ -364,7 +387,27 @@ def get_video_info(url):
     final_audio = clean_list(sorted(audio_map.values(), key=sort_rank, reverse=True)[:8])
     final_video = clean_list(sorted(video_map.values(), key=sort_rank, reverse=True)[:8])
 
-    logger.info(f"Processed: {len(final_normal)} normal, {len(final_audio)} audio, {len(final_video)} video-only")
+    logger.info(f"Final: {len(final_normal)} normal, {len(final_audio)} audio, {len(final_video)} video-only")
+
+    # If still no formats, it means extraction partially failed
+    if not final_normal and not final_audio and not final_video:
+        logger.warning("No formats extracted, trying Playwright as last resort...")
+        playwright_result = extract_with_playwright(url)
+        if playwright_result:
+            # Merge metadata from yt-dlp with Playwright streams
+            playwright_result['title'] = info.get('title') or playwright_result.get('title', 'Video')
+            playwright_result['thumbnail'] = info.get('thumbnail') or playwright_result.get('thumbnail', '')
+            playwright_result['uploader'] = info.get('uploader') or info.get('channel') or playwright_result.get('uploader', 'Unknown')
+            view_count = info.get('view_count')
+            playwright_result['views'] = f"{view_count:,}" if view_count else playwright_result.get('views', 'N/A')
+            playwright_result['duration'] = info.get('duration') or playwright_result.get('duration', 0)
+            return playwright_result
+        
+        return {
+            "error": f"Video found but no downloadable formats available. The video may be protected or region-locked.",
+            "title": info.get('title', 'Unknown'),
+            "thumbnail": info.get('thumbnail', '')
+        }
 
     # Format views
     view_count = info.get('view_count')
@@ -418,7 +461,7 @@ def analyze():
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
     logger.info(f"=" * 60)
-    logger.info(f"🚀 VaultPro Elite starting on port {port}")
+    logger.info(f"🚀 KunalPro Elite starting on port {port}")
     logger.info(f"🌐 Open: http://127.0.0.1:{port}")
     logger.info(f"🤖 Playwright: Available")
     logger.info(f"=" * 60)
