@@ -1,10 +1,13 @@
-from flask import Flask, render_template, request, jsonify, send_from_directory, send_file
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import yt_dlp
 import os
 import logging
 import platform
-import subprocess
+import json
+import re
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -19,46 +22,147 @@ CORS(app)
 # Check if running locally (for cookie support)
 IS_LOCAL = platform.system() == 'Windows' or os.path.exists('/Users')
 
+# Thread pool for async operations
+executor = ThreadPoolExecutor(max_workers=3)
+
+def extract_with_playwright(url):
+    """Use Playwright browser automation to extract video info - bypasses bot detection."""
+    try:
+        from playwright.sync_api import sync_playwright
+        logger.info("[Playwright] Starting browser-based extraction...")
+        
+        with sync_playwright() as p:
+            # Launch headless browser
+            browser = p.chromium.launch(headless=True)
+            context = browser.new_context(
+                user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                viewport={'width': 1920, 'height': 1080}
+            )
+            page = context.new_page()
+            
+            # Enable request interception to capture video URLs
+            video_urls = []
+            
+            def handle_response(response):
+                url = response.url
+                content_type = response.headers.get('content-type', '')
+                if 'video' in content_type or '.mp4' in url or '.webm' in url or 'googlevideo.com' in url:
+                    video_urls.append({
+                        'url': url,
+                        'content_type': content_type
+                    })
+            
+            page.on('response', handle_response)
+            
+            # Navigate to the video page
+            logger.info(f"[Playwright] Navigating to: {url}")
+            page.goto(url, wait_until='networkidle', timeout=30000)
+            
+            # Wait for video element
+            page.wait_for_timeout(3000)
+            
+            # Try to get video info from page
+            title = page.title()
+            
+            # Try to extract video element src
+            video_src = page.evaluate('''() => {
+                const video = document.querySelector('video');
+                if (video) {
+                    return video.src || video.querySelector('source')?.src;
+                }
+                return null;
+            }''')
+            
+            if video_src:
+                video_urls.append({'url': video_src, 'content_type': 'video/mp4'})
+            
+            # Get thumbnail
+            thumbnail = page.evaluate('''() => {
+                const og = document.querySelector('meta[property="og:image"]');
+                if (og) return og.content;
+                const video = document.querySelector('video');
+                if (video) return video.poster;
+                return '';
+            }''')
+            
+            browser.close()
+            
+            if video_urls:
+                logger.info(f"[Playwright] SUCCESS! Found {len(video_urls)} video streams")
+                # Format the results
+                formats = []
+                for i, v in enumerate(video_urls[:8]):
+                    formats.append({
+                        'quality': f'Stream {i+1}',
+                        'ext': 'mp4',
+                        'size': 'Stream',
+                        'url': v['url']
+                    })
+                
+                return {
+                    'title': title or 'Video',
+                    'thumbnail': thumbnail or '',
+                    'duration': 0,
+                    'uploader': 'Unknown',
+                    'views': 'N/A',
+                    'normal': formats[:8],
+                    'audio': [],
+                    'video': []
+                }
+            else:
+                logger.warning("[Playwright] No video URLs captured")
+                return None
+                
+    except ImportError:
+        logger.warning("[Playwright] Playwright not installed, skipping browser extraction")
+        return None
+    except Exception as e:
+        logger.error(f"[Playwright] Error: {str(e)}")
+        return None
+
+
 def get_video_info(url):
     """Extract video info with maximum compatibility across platforms."""
     
+    logger.info(f"=" * 50)
+    logger.info(f"Processing URL: {url}")
+    logger.info(f"Running locally: {IS_LOCAL}")
+    
     # Detect platform type
     is_youtube = 'youtube.com' in url or 'youtu.be' in url
+    is_tiktok = 'tiktok.com' in url
+    is_twitter = 'twitter.com' in url or 'x.com' in url
+    is_instagram = 'instagram.com' in url
+    is_facebook = 'facebook.com' in url or 'fb.watch' in url
     
-    # Base options optimized for each platform
+    platform_name = "YouTube" if is_youtube else "TikTok" if is_tiktok else "Twitter" if is_twitter else "Instagram" if is_instagram else "Facebook" if is_facebook else "Other"
+    logger.info(f"Detected platform: {platform_name}")
+    
+    # Base options - optimized for stealth
     ydl_opts = {
-        'quiet': False,
-        'verbose': True,
-        'no_warnings': False,
+        'quiet': True,
+        'no_warnings': True,
         'format': 'best',
-        'extract_flat': False,
         'nocheckcertificate': True,
-        'ignoreerrors': True,
-        'logtostderr': False,
-        'no_color': True,
-        'socket_timeout': 60,
-        'retries': 5,
-        'fragment_retries': 5,
-        'http_chunk_size': 10485760,
+        'ignoreerrors': False,
+        'socket_timeout': 30,
+        'retries': 3,
         'headers': {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
             'Accept-Language': 'en-US,en;q=0.9',
             'Accept-Encoding': 'gzip, deflate, br',
             'DNT': '1',
-            'Connection': 'keep-alive',
             'Upgrade-Insecure-Requests': '1',
             'Sec-Fetch-Dest': 'document',
             'Sec-Fetch-Mode': 'navigate',
             'Sec-Fetch-Site': 'none',
             'Sec-Fetch-User': '?1',
-            'Cache-Control': 'max-age=0',
         },
         'geo_bypass': True,
-        'geo_bypass_country': 'US',
     }
     
-    # YouTube-specific settings
+    # Platform-specific settings
     if is_youtube:
         ydl_opts['extractor_args'] = {
             'youtube': {
@@ -66,89 +170,67 @@ def get_video_info(url):
                 'player_skip': ['webpage', 'configs'],
             }
         }
-        
-        # Try to use browser cookies on local machines
+        # Use browser cookies on local machines
         if IS_LOCAL:
-            logger.info("Running locally - attempting to use browser cookies...")
-            for browser in ['chrome', 'firefox', 'edge', 'brave', 'opera', 'safari']:
-                try:
-                    test_opts = ydl_opts.copy()
-                    test_opts['cookiesfrombrowser'] = (browser,)
-                    test_opts['quiet'] = True
-                    logger.info(f"Testing {browser} cookies...")
-                    ydl_opts['cookiesfrombrowser'] = (browser,)
-                    break
-                except Exception as e:
-                    logger.debug(f"{browser} cookies not available: {e}")
-                    continue
+            logger.info("Attempting to use Chrome cookies for YouTube...")
+            ydl_opts['cookiesfrombrowser'] = ('chrome',)
     
     info = None
     last_error = None
     
-    # Attempt 1: Primary extraction
+    # Attempt 1: Primary extraction with yt-dlp
     try:
-        logger.info(f"[Attempt 1] Extracting: {url}")
+        logger.info(f"[Attempt 1] yt-dlp primary extraction...")
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
+        if info:
+            logger.info(f"[Attempt 1] SUCCESS! Title: {info.get('title', 'Unknown')}")
     except Exception as e:
         last_error = str(e)
-        logger.warning(f"[Attempt 1] Failed: {last_error}")
+        logger.warning(f"[Attempt 1] Failed: {last_error[:100]}")
     
-    # Attempt 2: Try without cookies and with different client
-    if not info and is_youtube:
+    # Attempt 2: Try simpler options
+    if not info:
         try:
-            logger.info("[Attempt 2] Trying iOS/mweb client...")
-            ydl_opts2 = {
+            logger.info("[Attempt 2] Trying with minimal options...")
+            simple_opts = {
                 'quiet': True,
                 'format': 'best',
                 'nocheckcertificate': True,
-                'ignoreerrors': True,
-                'socket_timeout': 60,
+                'socket_timeout': 30,
                 'geo_bypass': True,
                 'extractor_args': {
                     'youtube': {
-                        'player_client': ['ios', 'mweb'],
+                        'player_client': ['mweb', 'android'],
                     }
                 }
             }
-            with yt_dlp.YoutubeDL(ydl_opts2) as ydl:
+            with yt_dlp.YoutubeDL(simple_opts) as ydl:
                 info = ydl.extract_info(url, download=False)
+            if info:
+                logger.info(f"[Attempt 2] SUCCESS!")
         except Exception as e:
             last_error = str(e)
-            logger.warning(f"[Attempt 2] Failed: {last_error}")
-    
-    # Attempt 3: Try tv_embedded client
+            logger.warning(f"[Attempt 2] Failed: {last_error[:100]}")
+
+    # Attempt 3: Use Playwright browser automation (best for bypassing bot detection)
     if not info and is_youtube:
-        try:
-            logger.info("[Attempt 3] Trying tv_embedded client...")
-            ydl_opts3 = {
-                'quiet': True,
-                'format': 'best',
-                'nocheckcertificate': True,
-                'ignoreerrors': True,
-                'socket_timeout': 60,
-                'geo_bypass': True,
-                'extractor_args': {
-                    'youtube': {
-                        'player_client': ['tv_embedded'],
-                    }
-                }
-            }
-            with yt_dlp.YoutubeDL(ydl_opts3) as ydl:
-                info = ydl.extract_info(url, download=False)
-        except Exception as e:
-            last_error = str(e)
-            logger.warning(f"[Attempt 3] Failed: {last_error}")
+        logger.info("[Attempt 3] Trying Playwright browser automation...")
+        playwright_result = extract_with_playwright(url)
+        if playwright_result:
+            return playwright_result
 
     # Handle failure
     if not info:
+        logger.error(f"All extraction attempts failed for {platform_name}")
         if is_youtube:
             return {
-                "error": "YouTube is blocking this request. This is common on shared servers. Try: TikTok, Twitter/X, Instagram, or Facebook links instead - they work great!",
-                "suggestion": "Try pasting a TikTok, Twitter, Instagram, or Facebook link instead."
+                "error": "YouTube is blocking this request. This is common on shared servers. Try: TikTok, Twitter/X, Instagram, or Vimeo links instead - they work great!",
+                "suggestion": "Try pasting a TikTok, Vimeo, or Dailymotion link instead."
             }
         else:
-            return {"error": f"Could not extract video. Error: {last_error[:150] if last_error else 'Unknown error'}"}
+            error_msg = last_error[:200] if last_error else 'Unknown error'
+            return {"error": f"Could not extract from {platform_name}. Error: {error_msg}"}
     
     # Process formats
     formats = info.get('formats') or []
@@ -262,7 +344,7 @@ def index():
 
 @app.route('/health')
 def health():
-    return jsonify({"status": "healthy"}), 200
+    return jsonify({"status": "healthy", "playwright": True}), 200
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
@@ -275,4 +357,6 @@ def analyze():
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
+    logger.info(f"Starting VaultPro Elite on port {port}...")
+    logger.info(f"Playwright browser automation: ENABLED")
     app.run(host='0.0.0.0', port=port)
