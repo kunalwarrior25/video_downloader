@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KunalPro Elite | Ultimate Video Downloader</title>
+    <title>KunalPRO Elite | Ultimate Video Downloader</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -186,6 +186,15 @@
             background: rgba(100, 116, 139, 0.3);
             color: #94a3b8;
         }
+        
+        .format-count {
+            background: rgba(139, 92, 246, 0.2);
+            color: #a78bfa;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -200,7 +209,7 @@
                     <i class="fas fa-bolt text-white text-2xl"></i>
                 </div>
                 <div>
-                    <span class="text-2xl font-black tracking-tight">Kunal<span class="text-violet-500">PRO</span></span>
+                    <span class="text-2xl font-black tracking-tight">KUNAL<span class="text-violet-500">PRO</span></span>
                     <span class="badge-elite text-[10px] font-bold px-2 py-0.5 rounded-full ml-2 text-white">ELITE</span>
                 </div>
             </div>
@@ -325,17 +334,17 @@
                             <button onclick="switchTab('normal')" id="tab-normal" class="tab-btn active px-5 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-white/5 transition text-white">
                                 <i class="fas fa-video text-violet-400"></i> 
                                 Full Video
-                                <span id="count-normal" class="text-xs bg-violet-500/20 text-violet-300 px-2 py-0.5 rounded-full">0</span>
+                                <span id="count-normal" class="format-count">0</span>
                             </button>
                             <button onclick="switchTab('audio')" id="tab-audio" class="tab-btn px-5 py-3 rounded-xl font-bold flex items-center gap-2 text-slate-400 hover:bg-white/5 transition">
                                 <i class="fas fa-music text-pink-400"></i> 
                                 Audio Only
-                                <span id="count-audio" class="text-xs bg-pink-500/20 text-pink-300 px-2 py-0.5 rounded-full">0</span>
+                                <span id="count-audio" class="format-count">0</span>
                             </button>
                             <button onclick="switchTab('videoOnly')" id="tab-videoOnly" class="tab-btn px-5 py-3 rounded-xl font-bold flex items-center gap-2 text-slate-400 hover:bg-white/5 transition">
                                 <i class="fas fa-film text-cyan-400"></i> 
                                 No Audio
-                                <span id="count-video" class="text-xs bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded-full">0</span>
+                                <span id="count-video" class="format-count">0</span>
                             </button>
                         </div>
 
@@ -375,7 +384,7 @@
 
         <!-- Footer -->
         <footer class="mt-20 py-8 border-t border-white/5 text-center">
-            <p class="text-slate-600 text-sm font-medium">VaultPro Elite • Powered by Playwright & yt-dlp</p>
+            <p class="text-slate-600 text-sm font-medium">KunalPRO Elite • Powered by Playwright & yt-dlp</p>
         </footer>
     </div>
 
@@ -503,13 +512,15 @@
             if (q.includes('2160') || q.includes('4k') || q.includes('1440')) {
                 return '<span class="quality-badge ultra">4K ULTRA</span>';
             } else if (q.includes('1080')) {
-                return '<span class="quality-badge hd">HD</span>';
+                return '<span class="quality-badge hd">FULL HD</span>';
             } else if (q.includes('720')) {
                 return '<span class="quality-badge hd">HD</span>';
             } else if (q.includes('256') || q.includes('320')) {
                 return '<span class="quality-badge ultra">HI-FI</span>';
-            } else if (q.includes('128') || q.includes('160')) {
+            } else if (q.includes('128') || q.includes('160') || q.includes('192')) {
                 return '<span class="quality-badge hd">GOOD</span>';
+            } else if (q.includes('480') || q.includes('360')) {
+                return '<span class="quality-badge sd">SD</span>';
             }
             return '';
         }
@@ -523,6 +534,7 @@
                     <div class="col-span-full py-12 text-center">
                         <i class="fas fa-box-open text-4xl text-slate-700 mb-3"></i>
                         <p class="text-slate-500">No formats available in this category.</p>
+                        <p class="text-slate-600 text-sm mt-2">Try a different video or platform.</p>
                     </div>
                 `;
                 return;
@@ -537,17 +549,24 @@
                 const ext = (f.ext || 'mp4').toUpperCase();
                 const size = f.size || 'Stream';
                 
+                // Rank indicator for top qualities
+                let rankBadge = '';
+                if (index === 0) {
+                    rankBadge = '<span class="text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded font-bold ml-2">BEST</span>';
+                }
+                
                 card.innerHTML = `
                     <div>
-                        <div class="flex items-center gap-2 mb-1">
+                        <div class="flex items-center gap-2 mb-1 flex-wrap">
                             <span class="text-xl font-black text-white">${qualityLabel}</span>
                             ${badge}
+                            ${rankBadge}
                         </div>
                         <div class="text-xs text-slate-500 uppercase font-bold tracking-wider">
                             ${ext} • ${size}
                         </div>
                     </div>
-                    <a href="${f.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="download-btn w-12 h-12 flex items-center justify-center bg-violet-500/10 rounded-xl transition-all duration-300">
+                    <a href="${f.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="download-btn w-12 h-12 flex items-center justify-center bg-violet-500/10 rounded-xl transition-all duration-300 hover:scale-110">
                         <i class="fas fa-download text-lg text-violet-400"></i>
                     </a>
                 `;
