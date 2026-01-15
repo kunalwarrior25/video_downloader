@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VaultPro Elite | Ultimate Video Downloader</title>
+    <title>KunalPro Elite | Ultimate Video Downloader</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -14,7 +14,6 @@
             --secondary: #ec4899;
             --accent: #06b6d4;
             --bg-dark: #030712;
-            --bg-card: rgba(15, 23, 42, 0.8);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -24,30 +23,22 @@
             background: var(--bg-dark);
             color: #f8fafc;
             min-height: 100vh;
-            overflow-x: hidden;
         }
 
-        /* Animated Background */
         .bg-animated {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             z-index: -1;
             background: 
                 radial-gradient(ellipse at 0% 0%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
-                radial-gradient(ellipse at 100% 0%, rgba(236, 72, 153, 0.1) 0%, transparent 50%),
-                radial-gradient(ellipse at 100% 100%, rgba(6, 182, 212, 0.1) 0%, transparent 50%),
-                radial-gradient(ellipse at 0% 100%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
+                radial-gradient(ellipse at 100% 100%, rgba(236, 72, 153, 0.1) 0%, transparent 50%);
         }
 
         .bg-grid {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background-image: 
                 linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
@@ -55,17 +46,12 @@
             z-index: -1;
         }
 
-        /* Glassmorphism Card */
         .glass {
-            background: var(--bg-card);
+            background: rgba(15, 23, 42, 0.8);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 
-                0 25px 50px rgba(0, 0, 0, 0.5),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
 
-        /* Neon Border Effect */
         .neon-border {
             position: relative;
         }
@@ -74,13 +60,11 @@
             content: '';
             position: absolute;
             inset: -2px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent), var(--primary));
-            background-size: 400% 400%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
             border-radius: inherit;
             z-index: -1;
             opacity: 0;
             transition: opacity 0.4s;
-            animation: gradient-shift 8s ease infinite;
         }
 
         .neon-border:hover::before,
@@ -88,37 +72,14 @@
             opacity: 1;
         }
 
-        @keyframes gradient-shift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-
-        /* Gradient Text */
         .gradient-text {
             background: linear-gradient(135deg, #fff 0%, var(--primary) 50%, var(--secondary) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
         }
 
-        /* Glowing Button */
         .btn-glow {
-            position: relative;
-            overflow: hidden;
             transition: all 0.3s ease;
-        }
-
-        .btn-glow::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .btn-glow:hover::before {
-            opacity: 1;
         }
 
         .btn-glow:hover {
@@ -126,35 +87,27 @@
             box-shadow: 0 20px 40px rgba(139, 92, 246, 0.4);
         }
 
-        /* Quality Card */
         .quality-card {
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .quality-card:hover {
-            transform: translateY(-8px) scale(1.02);
+            transform: translateY(-5px) scale(1.02);
             background: rgba(30, 41, 59, 0.9);
             border-color: var(--primary);
-            box-shadow: 0 20px 40px rgba(139, 92, 246, 0.2);
         }
 
         .quality-card:hover .download-btn {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
-            transform: scale(1.1);
         }
 
         .quality-card:hover .download-btn i {
             color: white;
         }
 
-        /* Tab Buttons */
         .tab-btn {
             position: relative;
             transition: all 0.3s;
-        }
-
-        .tab-btn.active {
-            color: white;
         }
 
         .tab-btn.active::after {
@@ -168,7 +121,6 @@
             border-radius: 2px;
         }
 
-        /* Status Indicator */
         .status-pulse {
             animation: pulse 2s infinite;
         }
@@ -178,7 +130,6 @@
             50% { opacity: 0.8; box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
         }
 
-        /* Test Section Glow */
         .test-glow {
             animation: test-pulse 3s infinite;
         }
@@ -188,7 +139,6 @@
             50% { box-shadow: 0 0 60px rgba(34, 197, 94, 0.5); }
         }
 
-        /* Platform Button */
         .platform-btn {
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
@@ -197,7 +147,6 @@
             transform: translateY(-5px) scale(1.05);
         }
 
-        /* Loader */
         .loader {
             border: 3px solid rgba(255, 255, 255, 0.1);
             border-top: 3px solid white;
@@ -212,35 +161,30 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Badge */
         .badge-elite {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
-            animation: badge-glow 2s infinite;
         }
 
-        @keyframes badge-glow {
-            0%, 100% { box-shadow: 0 0 10px rgba(139, 92, 246, 0.5); }
-            50% { box-shadow: 0 0 20px rgba(236, 72, 153, 0.8); }
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--bg-dark);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(var(--primary), var(--secondary));
+        .quality-badge {
+            font-size: 10px;
+            padding: 2px 8px;
             border-radius: 4px;
+            font-weight: 700;
         }
 
-        /* Feature Icons */
-        .feature-icon {
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2));
-            border: 1px solid rgba(139, 92, 246, 0.3);
+        .quality-badge.ultra {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #000;
+        }
+
+        .quality-badge.hd {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #fff;
+        }
+
+        .quality-badge.sd {
+            background: rgba(100, 116, 139, 0.3);
+            color: #94a3b8;
         }
     </style>
 </head>
@@ -256,86 +200,67 @@
                     <i class="fas fa-bolt text-white text-2xl"></i>
                 </div>
                 <div>
-                    <span class="text-2xl font-black tracking-tight">VAULT<span class="text-violet-500">PRO</span></span>
+                    <span class="text-2xl font-black tracking-tight">Kunal<span class="text-violet-500">PRO</span></span>
                     <span class="badge-elite text-[10px] font-bold px-2 py-0.5 rounded-full ml-2 text-white">ELITE</span>
                 </div>
             </div>
-            <div class="flex items-center gap-6">
+            <div class="flex items-center gap-4">
                 <div id="serverStatus" class="hidden md:flex items-center gap-2 px-4 py-2 bg-yellow-500/10 border border-yellow-500/30 rounded-full text-yellow-400 text-sm font-medium">
                     <span class="w-2 h-2 bg-yellow-400 rounded-full"></span>
                     Checking...
-                </div>
-                <div class="hidden md:flex items-center gap-2 px-4 py-2 bg-violet-500/10 border border-violet-500/30 rounded-full text-violet-400 text-sm font-medium">
-                    <i class="fas fa-robot"></i>
-                    Playwright Active
                 </div>
             </div>
         </nav>
 
         <!-- Hero Section -->
-        <div class="text-center mb-12">
-            <div class="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm text-slate-400 mb-6">
-                <i class="fas fa-sparkles text-yellow-400"></i>
-                Powered by Browser Automation + AI
-            </div>
-            
+        <div class="text-center mb-10">
             <h1 class="text-5xl md:text-7xl font-black mb-6 tracking-tight leading-tight">
                 Download Any Video<br>
                 <span class="gradient-text">8 Quality Options</span>
             </h1>
             
-            <p class="text-slate-400 text-lg max-w-2xl mx-auto mb-8">
-                Advanced extraction with Playwright browser automation. Bypasses bot detection. 
+            <p class="text-slate-400 text-lg max-w-2xl mx-auto mb-6">
+                Advanced extraction with Playwright browser automation. 
                 Get <strong class="text-white">8 quality levels</strong> for Full Video, Audio Only, and Video Only.
             </p>
         </div>
 
         <!-- Quick Test Section -->
-        <div class="test-glow bg-gradient-to-br from-emerald-900/40 to-green-900/30 border-2 border-emerald-500/50 rounded-3xl p-8 mb-10">
-            <div class="text-center mb-6">
-                <span class="bg-emerald-500 text-white px-5 py-2 rounded-full text-sm font-black uppercase tracking-wider inline-flex items-center gap-2">
+        <div class="test-glow bg-gradient-to-br from-emerald-900/40 to-green-900/30 border-2 border-emerald-500/50 rounded-3xl p-6 mb-8">
+            <div class="text-center mb-4">
+                <span class="bg-emerald-500 text-white px-4 py-2 rounded-full text-sm font-black uppercase tracking-wider inline-flex items-center gap-2">
                     <i class="fas fa-check-circle"></i>
                     WORKING TEST LINKS
                 </span>
             </div>
             
-            <p class="text-emerald-300 text-xl mb-6 font-bold text-center">
-                Click any button to test the downloader:
-            </p>
-            
-            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-                <button onclick="testLink('https://www.tiktok.com/@zachking/video/7322754598498908459')" class="platform-btn bg-gradient-to-br from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white px-4 py-5 rounded-2xl font-bold shadow-lg shadow-pink-600/30">
-                    <i class="fab fa-tiktok text-3xl mb-2 block"></i>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <button onclick="testLink('https://www.tiktok.com/@zachking/video/7322754598498908459')" class="platform-btn bg-gradient-to-br from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white px-4 py-4 rounded-2xl font-bold shadow-lg">
+                    <i class="fab fa-tiktok text-2xl mb-1 block"></i>
                     TikTok
                 </button>
-                <button onclick="testLink('https://vimeo.com/824804225')" class="platform-btn bg-gradient-to-br from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white px-4 py-5 rounded-2xl font-bold shadow-lg shadow-cyan-600/30">
-                    <i class="fab fa-vimeo-v text-3xl mb-2 block"></i>
+                <button onclick="testLink('https://vimeo.com/824804225')" class="platform-btn bg-gradient-to-br from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white px-4 py-4 rounded-2xl font-bold shadow-lg">
+                    <i class="fab fa-vimeo-v text-2xl mb-1 block"></i>
                     Vimeo
                 </button>
-                <button onclick="testLink('https://www.dailymotion.com/video/x8m9r2a')" class="platform-btn bg-gradient-to-br from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white px-4 py-5 rounded-2xl font-bold shadow-lg shadow-orange-500/30">
-                    <i class="fas fa-play-circle text-3xl mb-2 block"></i>
+                <button onclick="testLink('https://www.dailymotion.com/video/x8m9r2a')" class="platform-btn bg-gradient-to-br from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white px-4 py-4 rounded-2xl font-bold shadow-lg">
+                    <i class="fas fa-play-circle text-2xl mb-1 block"></i>
                     Dailymotion
                 </button>
-                <button onclick="testLink('https://twitter.com/SpaceX/status/1748354168953684028')" class="platform-btn bg-gradient-to-br from-sky-600 to-blue-700 hover:from-sky-500 hover:to-blue-600 text-white px-4 py-5 rounded-2xl font-bold shadow-lg shadow-sky-600/30">
-                    <i class="fab fa-twitter text-3xl mb-2 block"></i>
+                <button onclick="testLink('https://twitter.com/SpaceX/status/1748354168953684028')" class="platform-btn bg-gradient-to-br from-sky-600 to-blue-700 hover:from-sky-500 hover:to-blue-600 text-white px-4 py-4 rounded-2xl font-bold shadow-lg">
+                    <i class="fab fa-twitter text-2xl mb-1 block"></i>
                     Twitter
-                </button>
-                <button onclick="testLink('https://www.facebook.com/watch/?v=1234567890')" class="platform-btn bg-gradient-to-br from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 text-white px-4 py-5 rounded-2xl font-bold shadow-lg shadow-blue-600/30">
-                    <i class="fab fa-facebook text-3xl mb-2 block"></i>
-                    Facebook
                 </button>
             </div>
             
-            <div class="mt-6 text-center">
-                <p class="text-slate-400 text-sm">
-                    <i class="fas fa-info-circle mr-1"></i>
-                    YouTube often blocks server IPs. Use TikTok, Vimeo, or Dailymotion for best results.
-                </p>
-            </div>
+            <p class="text-slate-400 text-sm text-center mt-4">
+                <i class="fas fa-info-circle mr-1"></i>
+                YouTube often blocks server IPs. Use TikTok, Vimeo, or Dailymotion for best results.
+            </p>
         </div>
 
         <!-- Search Bar -->
-        <div class="max-w-3xl mx-auto mb-16">
+        <div class="max-w-3xl mx-auto mb-12">
             <div class="neon-border glass p-2 rounded-3xl flex flex-col md:flex-row gap-2">
                 <div class="flex-1 flex items-center px-5">
                     <i class="fas fa-link text-violet-500 mr-4 text-xl"></i>
@@ -360,7 +285,7 @@
         </div>
 
         <!-- Error Container -->
-        <div id="errorContainer" class="hidden max-w-3xl mx-auto mb-10"></div>
+        <div id="errorContainer" class="hidden max-w-3xl mx-auto mb-8"></div>
 
         <!-- Result Section -->
         <div id="resultContainer" class="hidden">
@@ -368,25 +293,25 @@
                 <!-- Video Info Card -->
                 <div class="lg:col-span-4">
                     <div class="glass rounded-3xl overflow-hidden p-5 sticky top-8">
-                        <div class="relative mb-6">
-                            <img id="videoThumb" src="" alt="Thumbnail" class="w-full h-52 object-cover rounded-2xl shadow-2xl">
-                            <div class="absolute bottom-3 right-3 bg-black/70 backdrop-blur px-3 py-1 rounded-lg text-sm font-bold">
+                        <div class="relative mb-5">
+                            <img id="videoThumb" src="" alt="Thumbnail" class="w-full h-48 object-cover rounded-2xl shadow-2xl bg-slate-800">
+                            <div class="absolute bottom-3 right-3 bg-black/80 backdrop-blur px-3 py-1 rounded-lg text-sm font-bold">
                                 <span id="videoDuration">00:00</span>
                             </div>
                         </div>
-                        <h3 id="videoTitle" class="text-xl font-bold mb-4 line-clamp-2 leading-tight">Video Title</h3>
+                        <h3 id="videoTitle" class="text-lg font-bold mb-4 line-clamp-2 leading-tight">Video Title</h3>
                         <div class="space-y-3 text-sm">
                             <div class="flex justify-between items-center py-2 border-b border-white/5">
-                                <span class="text-slate-500 flex items-center gap-2"><i class="fas fa-user"></i> Creator</span>
-                                <span id="videoUploader" class="text-white font-semibold">Unknown</span>
+                                <span class="text-slate-500"><i class="fas fa-user mr-2"></i>Creator</span>
+                                <span id="videoUploader" class="text-white font-semibold truncate max-w-[150px]">Unknown</span>
                             </div>
                             <div class="flex justify-between items-center py-2 border-b border-white/5">
-                                <span class="text-slate-500 flex items-center gap-2"><i class="fas fa-eye"></i> Views</span>
+                                <span class="text-slate-500"><i class="fas fa-eye mr-2"></i>Views</span>
                                 <span id="videoViews" class="text-white font-semibold">0</span>
                             </div>
                             <div class="flex justify-between items-center py-2">
-                                <span class="text-slate-500 flex items-center gap-2"><i class="fas fa-download"></i> Formats</span>
-                                <span id="totalFormats" class="text-violet-400 font-semibold">24 options</span>
+                                <span class="text-slate-500"><i class="fas fa-download mr-2"></i>Formats</span>
+                                <span id="totalFormats" class="text-violet-400 font-semibold">0 options</span>
                             </div>
                         </div>
                     </div>
@@ -394,89 +319,81 @@
 
                 <!-- Download Options -->
                 <div class="lg:col-span-8">
-                    <div class="glass rounded-3xl p-8">
+                    <div class="glass rounded-3xl p-6">
                         <!-- Tabs -->
-                        <div class="flex flex-wrap gap-2 mb-8 pb-4 border-b border-white/10">
-                            <button onclick="switchTab('normal')" id="tab-normal" class="tab-btn active px-6 py-3 rounded-xl font-bold text-lg flex items-center gap-2 hover:bg-white/5 transition">
+                        <div class="flex flex-wrap gap-2 mb-6 pb-4 border-b border-white/10">
+                            <button onclick="switchTab('normal')" id="tab-normal" class="tab-btn active px-5 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-white/5 transition text-white">
                                 <i class="fas fa-video text-violet-400"></i> 
                                 Full Video
-                                <span class="text-xs bg-violet-500/20 text-violet-300 px-2 py-0.5 rounded-full">8 max</span>
+                                <span id="count-normal" class="text-xs bg-violet-500/20 text-violet-300 px-2 py-0.5 rounded-full">0</span>
                             </button>
-                            <button onclick="switchTab('audio')" id="tab-audio" class="tab-btn px-6 py-3 rounded-xl font-bold text-lg flex items-center gap-2 text-slate-400 hover:bg-white/5 transition">
+                            <button onclick="switchTab('audio')" id="tab-audio" class="tab-btn px-5 py-3 rounded-xl font-bold flex items-center gap-2 text-slate-400 hover:bg-white/5 transition">
                                 <i class="fas fa-music text-pink-400"></i> 
                                 Audio Only
-                                <span class="text-xs bg-pink-500/20 text-pink-300 px-2 py-0.5 rounded-full">8 max</span>
+                                <span id="count-audio" class="text-xs bg-pink-500/20 text-pink-300 px-2 py-0.5 rounded-full">0</span>
                             </button>
-                            <button onclick="switchTab('videoOnly')" id="tab-videoOnly" class="tab-btn px-6 py-3 rounded-xl font-bold text-lg flex items-center gap-2 text-slate-400 hover:bg-white/5 transition">
+                            <button onclick="switchTab('videoOnly')" id="tab-videoOnly" class="tab-btn px-5 py-3 rounded-xl font-bold flex items-center gap-2 text-slate-400 hover:bg-white/5 transition">
                                 <i class="fas fa-film text-cyan-400"></i> 
                                 No Audio
-                                <span class="text-xs bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded-full">8 max</span>
+                                <span id="count-video" class="text-xs bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded-full">0</span>
                             </button>
                         </div>
 
                         <!-- Download Grids -->
-                        <div id="grid-normal" class="download-grid grid sm:grid-cols-2 gap-4"></div>
-                        <div id="grid-audio" class="download-grid hidden grid sm:grid-cols-2 gap-4"></div>
-                        <div id="grid-videoOnly" class="download-grid hidden grid sm:grid-cols-2 gap-4"></div>
+                        <div id="grid-normal" class="download-grid grid sm:grid-cols-2 gap-3"></div>
+                        <div id="grid-audio" class="download-grid hidden grid sm:grid-cols-2 gap-3"></div>
+                        <div id="grid-videoOnly" class="download-grid hidden grid sm:grid-cols-2 gap-3"></div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Features Section -->
-        <div class="mt-32 grid md:grid-cols-3 gap-8">
-            <div class="glass rounded-2xl p-8 text-center">
-                <div class="feature-icon w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                    <i class="fas fa-robot text-3xl text-violet-400"></i>
+        <div class="mt-24 grid md:grid-cols-3 gap-6">
+            <div class="glass rounded-2xl p-6 text-center">
+                <div class="w-14 h-14 bg-violet-500/10 border border-violet-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-robot text-2xl text-violet-400"></i>
                 </div>
-                <h4 class="text-xl font-bold mb-3">Browser Automation</h4>
-                <p class="text-slate-500">Playwright-powered extraction bypasses bot detection automatically.</p>
+                <h4 class="text-lg font-bold mb-2">Browser Automation</h4>
+                <p class="text-slate-500 text-sm">Playwright-powered extraction bypasses bot detection.</p>
             </div>
-            <div class="glass rounded-2xl p-8 text-center">
-                <div class="feature-icon w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                    <i class="fas fa-layer-group text-3xl text-pink-400"></i>
+            <div class="glass rounded-2xl p-6 text-center">
+                <div class="w-14 h-14 bg-pink-500/10 border border-pink-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-layer-group text-2xl text-pink-400"></i>
                 </div>
-                <h4 class="text-xl font-bold mb-3">8 Quality Levels</h4>
-                <p class="text-slate-500">Get up to 8 different qualities for Full Video, Audio, and Video-only.</p>
+                <h4 class="text-lg font-bold mb-2">8 Quality Levels</h4>
+                <p class="text-slate-500 text-sm">Full Video, Audio, and Video-only with 8 options each.</p>
             </div>
-            <div class="glass rounded-2xl p-8 text-center">
-                <div class="feature-icon w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                    <i class="fas fa-globe text-3xl text-cyan-400"></i>
+            <div class="glass rounded-2xl p-6 text-center">
+                <div class="w-14 h-14 bg-cyan-500/10 border border-cyan-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-globe text-2xl text-cyan-400"></i>
                 </div>
-                <h4 class="text-xl font-bold mb-3">1000+ Sites</h4>
-                <p class="text-slate-500">TikTok, Twitter, Instagram, Vimeo, Facebook, and many more.</p>
+                <h4 class="text-lg font-bold mb-2">1000+ Sites</h4>
+                <p class="text-slate-500 text-sm">TikTok, Twitter, Instagram, Vimeo, Facebook & more.</p>
             </div>
         </div>
 
         <!-- Footer -->
-        <footer class="mt-32 py-12 border-t border-white/5 text-center">
-            <div class="flex justify-center gap-6 mb-6 text-slate-500 text-xl">
-                <a href="#" class="hover:text-violet-400 transition"><i class="fab fa-github"></i></a>
-                <a href="#" class="hover:text-violet-400 transition"><i class="fab fa-discord"></i></a>
-                <a href="#" class="hover:text-violet-400 transition"><i class="fab fa-twitter"></i></a>
-            </div>
-            <p class="text-slate-600 text-sm font-medium tracking-wider uppercase">VaultPro Elite • Powered by Playwright & Scapy</p>
+        <footer class="mt-20 py-8 border-t border-white/5 text-center">
+            <p class="text-slate-600 text-sm font-medium">VaultPro Elite • Powered by Playwright & yt-dlp</p>
         </footer>
     </div>
 
     <script>
         let currentData = null;
 
-        // Check server status on load
+        // Check server status
         window.addEventListener('load', async () => {
             const statusEl = document.getElementById('serverStatus');
             try {
                 const res = await fetch('/health');
                 if (res.ok) {
-                    const data = await res.json();
                     statusEl.className = 'hidden md:flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 rounded-full text-emerald-400 text-sm font-medium';
                     statusEl.innerHTML = '<span class="w-2 h-2 bg-emerald-400 rounded-full status-pulse"></span>Server Online';
-                    console.log('✅ Server connected! Playwright:', data.playwright);
                 }
             } catch (e) {
                 statusEl.className = 'hidden md:flex items-center gap-2 px-4 py-2 bg-red-500/10 border border-red-500/30 rounded-full text-red-400 text-sm font-medium';
                 statusEl.innerHTML = '<span class="w-2 h-2 bg-red-400 rounded-full"></span>Offline';
-                console.warn('❌ Server not running. Start with: python app.py');
             }
         });
 
@@ -510,8 +427,6 @@
                     apiEndpoint = 'http://127.0.0.1:10000/analyze';
                 }
 
-                console.log('🔍 Processing:', urlInput.value);
-
                 const response = await fetch(apiEndpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -519,15 +434,11 @@
                 });
 
                 if (!response.ok) {
-                    if (response.status === 502 || response.status === 504) {
-                        throw new Error('Server timeout. Render may be waking up - please wait 30 seconds and try again.');
-                    }
                     const errorData = await response.json().catch(() => ({}));
                     throw new Error(errorData.error || `Server error: ${response.status}`);
                 }
 
                 const data = await response.json();
-                console.log('📦 Result:', data);
 
                 if (data.error) {
                     showError(data.error);
@@ -536,9 +447,8 @@
                     displayResults(data);
                 }
             } catch (err) {
-                console.error('❌ Error:', err);
                 let msg = err.message || 'Connection failed';
-                if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
+                if (msg.includes('Failed to fetch')) {
                     msg = 'Cannot connect to server. Run "python app.py" first!';
                 }
                 showError(msg);
@@ -553,7 +463,13 @@
         function displayResults(data) {
             currentData = data;
             
-            document.getElementById('videoThumb').src = data.thumbnail || 'https://via.placeholder.com/400x225?text=No+Thumbnail';
+            // Set thumbnail with fallback
+            const thumb = document.getElementById('videoThumb');
+            thumb.src = data.thumbnail || '';
+            thumb.onerror = function() {
+                this.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 225" fill="%231e293b"><rect width="400" height="225"/><text x="200" y="120" text-anchor="middle" fill="%2364748b" font-size="20">No Thumbnail</text></svg>';
+            };
+            
             document.getElementById('videoTitle').textContent = data.title || 'Untitled';
             document.getElementById('videoUploader').textContent = data.uploader || 'Unknown';
             document.getElementById('videoViews').textContent = data.views || 'N/A';
@@ -563,8 +479,15 @@
             const secs = duration % 60;
             document.getElementById('videoDuration').textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
 
-            const totalFormats = (data.normal?.length || 0) + (data.audio?.length || 0) + (data.video?.length || 0);
+            const normalCount = (data.normal || []).length;
+            const audioCount = (data.audio || []).length;
+            const videoCount = (data.video || []).length;
+            const totalFormats = normalCount + audioCount + videoCount;
+            
             document.getElementById('totalFormats').textContent = `${totalFormats} options`;
+            document.getElementById('count-normal').textContent = normalCount;
+            document.getElementById('count-audio').textContent = audioCount;
+            document.getElementById('count-video').textContent = videoCount;
 
             renderGrid('normal', data.normal || []);
             renderGrid('audio', data.audio || []);
@@ -575,15 +498,31 @@
             switchTab('normal');
         }
 
+        function getQualityBadge(quality) {
+            const q = quality.toLowerCase();
+            if (q.includes('2160') || q.includes('4k') || q.includes('1440')) {
+                return '<span class="quality-badge ultra">4K ULTRA</span>';
+            } else if (q.includes('1080')) {
+                return '<span class="quality-badge hd">HD</span>';
+            } else if (q.includes('720')) {
+                return '<span class="quality-badge hd">HD</span>';
+            } else if (q.includes('256') || q.includes('320')) {
+                return '<span class="quality-badge ultra">HI-FI</span>';
+            } else if (q.includes('128') || q.includes('160')) {
+                return '<span class="quality-badge hd">GOOD</span>';
+            }
+            return '';
+        }
+
         function renderGrid(type, formats) {
             const grid = document.getElementById(`grid-${type}`);
             grid.innerHTML = '';
 
             if (!formats || formats.length === 0) {
                 grid.innerHTML = `
-                    <div class="col-span-full py-16 text-center">
-                        <i class="fas fa-box-open text-5xl text-slate-700 mb-4"></i>
-                        <p class="text-slate-500 text-lg">No formats available in this category.</p>
+                    <div class="col-span-full py-12 text-center">
+                        <i class="fas fa-box-open text-4xl text-slate-700 mb-3"></i>
+                        <p class="text-slate-500">No formats available in this category.</p>
                     </div>
                 `;
                 return;
@@ -591,25 +530,29 @@
 
             formats.forEach((f, index) => {
                 const card = document.createElement('div');
-                card.className = 'quality-card bg-white/5 border border-white/10 p-5 rounded-2xl flex justify-between items-center group cursor-pointer';
+                card.className = 'quality-card bg-white/5 border border-white/10 p-4 rounded-2xl flex justify-between items-center group cursor-pointer';
                 
-                const isTop = index < 2;
                 const qualityLabel = f.quality || 'Auto';
+                const badge = getQualityBadge(qualityLabel);
+                const ext = (f.ext || 'mp4').toUpperCase();
+                const size = f.size || 'Stream';
                 
                 card.innerHTML = `
                     <div>
-                        <div class="flex items-center gap-3 mb-2">
+                        <div class="flex items-center gap-2 mb-1">
                             <span class="text-xl font-black text-white">${qualityLabel}</span>
-                            ${isTop ? '<span class="badge-elite text-[10px] font-bold px-2 py-1 rounded-full text-white">BEST</span>' : ''}
+                            ${badge}
                         </div>
                         <div class="text-xs text-slate-500 uppercase font-bold tracking-wider">
-                            ${(f.ext || 'mp4').toUpperCase()} • ${f.size || 'Stream'}
+                            ${ext} • ${size}
                         </div>
                     </div>
-                    <a href="${f.url}" target="_blank" rel="noopener" class="download-btn w-14 h-14 flex items-center justify-center bg-violet-500/10 rounded-xl transition-all duration-300">
-                        <i class="fas fa-download text-xl text-violet-400"></i>
+                    <a href="${f.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="download-btn w-12 h-12 flex items-center justify-center bg-violet-500/10 rounded-xl transition-all duration-300">
+                        <i class="fas fa-download text-lg text-violet-400"></i>
                     </a>
                 `;
+                
+                card.onclick = () => window.open(f.url, '_blank');
                 grid.appendChild(card);
             });
         }
@@ -632,39 +575,33 @@
             container.classList.remove('hidden');
 
             const isYouTube = message.toLowerCase().includes('youtube');
-            const isConnection = message.toLowerCase().includes('connect') || message.toLowerCase().includes('server');
 
             container.innerHTML = `
-                <div class="bg-red-500/10 border border-red-500/30 rounded-2xl p-6">
+                <div class="bg-red-500/10 border border-red-500/30 rounded-2xl p-5">
                     <div class="flex items-start gap-4">
-                        <div class="w-12 h-12 bg-red-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-exclamation-triangle text-red-400 text-xl"></i>
+                        <div class="w-10 h-10 bg-red-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-exclamation-triangle text-red-400"></i>
                         </div>
                         <div class="flex-1">
-                            <h4 class="text-red-400 font-bold mb-2">${isConnection ? 'Server Not Running' : 'Extraction Error'}</h4>
-                            <p class="text-slate-300 text-sm mb-4">${message}</p>
+                            <h4 class="text-red-400 font-bold mb-2">Extraction Error</h4>
+                            <p class="text-slate-300 text-sm mb-3">${message}</p>
                             ${isYouTube ? `
-                                <p class="text-slate-400 text-sm mb-3">Try these platforms that work reliably:</p>
+                                <p class="text-slate-400 text-sm mb-2">Try these platforms instead:</p>
                                 <div class="flex flex-wrap gap-2">
-                                    <button onclick="testLink('https://www.tiktok.com/@zachking/video/7322754598498908459')" class="text-xs bg-pink-500/30 text-pink-300 px-4 py-2 rounded-full hover:bg-pink-500/50 transition font-bold">
+                                    <button onclick="testLink('https://www.tiktok.com/@zachking/video/7322754598498908459')" class="text-xs bg-pink-500/30 text-pink-300 px-3 py-2 rounded-full hover:bg-pink-500/50 transition font-bold">
                                         <i class="fab fa-tiktok mr-1"></i> TikTok
                                     </button>
-                                    <button onclick="testLink('https://vimeo.com/824804225')" class="text-xs bg-cyan-500/30 text-cyan-300 px-4 py-2 rounded-full hover:bg-cyan-500/50 transition font-bold">
+                                    <button onclick="testLink('https://vimeo.com/824804225')" class="text-xs bg-cyan-500/30 text-cyan-300 px-3 py-2 rounded-full hover:bg-cyan-500/50 transition font-bold">
                                         <i class="fab fa-vimeo-v mr-1"></i> Vimeo
                                     </button>
-                                    <button onclick="testLink('https://www.dailymotion.com/video/x8m9r2a')" class="text-xs bg-orange-500/30 text-orange-300 px-4 py-2 rounded-full hover:bg-orange-500/50 transition font-bold">
+                                    <button onclick="testLink('https://www.dailymotion.com/video/x8m9r2a')" class="text-xs bg-orange-500/30 text-orange-300 px-3 py-2 rounded-full hover:bg-orange-500/50 transition font-bold">
                                         <i class="fas fa-play mr-1"></i> Dailymotion
                                     </button>
-                                </div>
-                            ` : isConnection ? `
-                                <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
-                                    <p class="text-yellow-400 font-bold text-sm mb-2"><i class="fas fa-terminal mr-2"></i>Start the server:</p>
-                                    <code class="text-xs text-slate-300 block bg-black/30 p-3 rounded font-mono">python app.py</code>
                                 </div>
                             ` : ''}
                         </div>
                         <button onclick="hideError()" class="text-slate-500 hover:text-white">
-                            <i class="fas fa-times text-xl"></i>
+                            <i class="fas fa-times"></i>
                         </button>
                     </div>
                 </div>
