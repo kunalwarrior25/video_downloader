@@ -3,106 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KunalPRO Elite | Ultimate Video Downloader</title>
+    <title>kunalpro | Premium Video Downloader</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
         
         :root {
-            --primary: #8b5cf6;
-            --secondary: #ec4899;
-            --accent: #06b6d4;
+            --primary: #6366f1;
+            --secondary: #a855f7;
+            --accent: #f43f5e;
             --bg-dark: #030712;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
         body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg-dark);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.1) 0px, transparent 50%);
             color: #f8fafc;
             min-height: 100vh;
-        }
-
-        .bg-animated {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: -1;
-            background: 
-                radial-gradient(ellipse at 0% 0%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
-                radial-gradient(ellipse at 100% 100%, rgba(236, 72, 153, 0.1) 0%, transparent 50%);
-        }
-
-        .bg-grid {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background-image: 
-                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-            background-size: 50px 50px;
-            z-index: -1;
+            overflow-x: hidden;
         }
 
         .glass {
-            background: rgba(15, 23, 42, 0.8);
+            background: rgba(17, 24, 39, 0.7);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
         }
 
-        .neon-border {
+        .premium-border {
             position: relative;
         }
-
-        .neon-border::before {
+        
+        .premium-border::after {
             content: '';
             position: absolute;
-            inset: -2px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
+            inset: -1px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary), var(--accent));
             border-radius: inherit;
             z-index: -1;
-            opacity: 0;
-            transition: opacity 0.4s;
+            opacity: 0.3;
+            transition: opacity 0.3s;
         }
 
-        .neon-border:hover::before,
-        .neon-border:focus-within::before {
+        .premium-border:focus-within::after {
             opacity: 1;
         }
 
         .gradient-text {
-            background: linear-gradient(135deg, #fff 0%, var(--primary) 50%, var(--secondary) 100%);
+            background: linear-gradient(135deg, #fff 30%, #a855f7 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
         .btn-glow {
+            box-shadow: 0 0 25px rgba(99, 102, 241, 0.4);
             transition: all 0.3s ease;
         }
 
         .btn-glow:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 20px 40px rgba(139, 92, 246, 0.4);
+            box-shadow: 0 0 40px rgba(99, 102, 241, 0.6);
+            transform: translateY(-2px);
         }
 
         .quality-card {
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
         }
 
         .quality-card:hover {
-            transform: translateY(-5px) scale(1.02);
-            background: rgba(30, 41, 59, 0.9);
-            border-color: var(--primary);
-        }
-
-        .quality-card:hover .download-btn {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-        }
-
-        .quality-card:hover .download-btn i {
-            color: white;
+            transform: scale(1.02) translateY(-5px);
+            background: rgba(31, 41, 55, 0.9);
+            border-color: rgba(168, 85, 247, 0.4);
         }
 
         .tab-btn {
@@ -110,419 +84,292 @@
             transition: all 0.3s;
         }
 
+        .tab-btn.active {
+            color: white;
+        }
+
         .tab-btn.active::after {
             content: '';
             position: absolute;
-            bottom: -2px;
+            bottom: -1px;
             left: 0;
             width: 100%;
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            border-radius: 2px;
+            height: 2px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
         }
 
-        .status-pulse {
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
-            50% { opacity: 0.8; box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
-        }
-
-        .test-glow {
-            animation: test-pulse 3s infinite;
-        }
-
-        @keyframes test-pulse {
-            0%, 100% { box-shadow: 0 0 30px rgba(34, 197, 94, 0.3); }
-            50% { box-shadow: 0 0 60px rgba(34, 197, 94, 0.5); }
-        }
-
-        .platform-btn {
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .platform-btn:hover {
-            transform: translateY(-5px) scale(1.05);
+        .platform-tag {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 4px 12px;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            color: #94a3b8;
         }
 
         .loader {
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-top: 3px solid white;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-top: 2px solid white;
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
             animation: spin 0.8s linear infinite;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .badge-elite {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-        }
-
-        .quality-badge {
-            font-size: 10px;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-weight: 700;
-        }
-
-        .quality-badge.ultra {
-            background: linear-gradient(135deg, #fbbf24, #f59e0b);
-            color: #000;
-        }
-
-        .quality-badge.hd {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: #fff;
-        }
-
-        .quality-badge.sd {
-            background: rgba(100, 116, 139, 0.3);
-            color: #94a3b8;
-        }
-        
-        .format-count {
-            background: rgba(139, 92, 246, 0.2);
-            color: #a78bfa;
-            padding: 2px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
+        /* Background grid effect */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: -1;
         }
     </style>
 </head>
 <body class="p-4 md:p-8">
-    <div class="bg-animated"></div>
     <div class="bg-grid"></div>
-    
-    <div class="max-w-6xl mx-auto relative">
+    <div class="max-w-6xl mx-auto">
         <!-- Navigation -->
-        <nav class="flex justify-between items-center mb-12">
-            <div class="flex items-center gap-4">
-                <div class="w-14 h-14 bg-gradient-to-br from-violet-600 via-purple-600 to-pink-600 rounded-2xl flex items-center justify-center shadow-2xl rotate-3 hover:rotate-6 transition-transform">
-                    <i class="fas fa-bolt text-white text-2xl"></i>
+        <nav class="flex justify-between items-center mb-16">
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg rotate-3">
+                    <i class="fas fa-crown text-white text-2xl"></i>
                 </div>
-                <div>
-                    <span class="text-2xl font-black tracking-tight">KUNAL<span class="text-violet-500">PRO</span></span>
-                    <span class="badge-elite text-[10px] font-bold px-2 py-0.5 rounded-full ml-2 text-white">ELITE</span>
-                </div>
+                <span class="text-2xl font-black tracking-tighter uppercase">kunal<span class="text-indigo-500">Pro</span></span>
             </div>
-            <div class="flex items-center gap-4">
-                <div id="serverStatus" class="hidden md:flex items-center gap-2 px-4 py-2 bg-yellow-500/10 border border-yellow-500/30 rounded-full text-yellow-400 text-sm font-medium">
-                    <span class="w-2 h-2 bg-yellow-400 rounded-full"></span>
-                    Checking...
+            <div class="flex items-center space-x-8">
+                <div class="hidden md:flex space-x-6 text-slate-400 font-semibold text-sm">
+                    <a href="#" class="hover:text-white transition">Features</a>
+                    <a href="#" class="hover:text-white transition">Network</a>
+                    <a href="#" class="hover:text-white transition">Status</a>
                 </div>
+                <button class="bg-white/5 hover:bg-white/10 px-5 py-2 rounded-full border border-white/10 text-sm font-bold transition">
+                    Dark Mode <i class="fas fa-moon ml-2"></i>
+                </button>
             </div>
         </nav>
 
         <!-- Hero Section -->
-        <div class="text-center mb-10">
-            <h1 class="text-5xl md:text-7xl font-black mb-6 tracking-tight leading-tight">
-                Download Any Video<br>
-                <span class="gradient-text">8 Quality Options</span>
+        <div class="text-center mb-16 relative">
+            <div class="absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 bg-indigo-600/20 blur-[120px] rounded-full"></div>
+            <h1 class="text-5xl md:text-7xl font-extrabold mb-6 tracking-tight">
+                Unlock Content <br><span class="gradient-text">Without Limits.</span>
             </h1>
-            
-            <p class="text-slate-400 text-lg max-w-2xl mx-auto mb-6">
-                Advanced extraction with Playwright browser automation. 
-                Get <strong class="text-white">8 quality levels</strong> for Full Video, Audio Only, and Video Only.
+            <p class="text-slate-400 text-lg max-w-xl mx-auto mb-10 leading-relaxed">
+                The most advanced video extractor. Experience high-fidelity 4K downloads, crystal clear audio, and zero advertisements.
             </p>
-        </div>
-
-        <!-- Quick Test Section -->
-        <div class="test-glow bg-gradient-to-br from-emerald-900/40 to-green-900/30 border-2 border-emerald-500/50 rounded-3xl p-6 mb-8">
-            <div class="text-center mb-4">
-                <span class="bg-emerald-500 text-white px-4 py-2 rounded-full text-sm font-black uppercase tracking-wider inline-flex items-center gap-2">
-                    <i class="fas fa-check-circle"></i>
-                    WORKING TEST LINKS
-                </span>
-            </div>
             
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <button onclick="testLink('https://www.tiktok.com/@zachking/video/7322754598498908459')" class="platform-btn bg-gradient-to-br from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white px-4 py-4 rounded-2xl font-bold shadow-lg">
-                    <i class="fab fa-tiktok text-2xl mb-1 block"></i>
-                    TikTok
-                </button>
-                <button onclick="testLink('https://vimeo.com/824804225')" class="platform-btn bg-gradient-to-br from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white px-4 py-4 rounded-2xl font-bold shadow-lg">
-                    <i class="fab fa-vimeo-v text-2xl mb-1 block"></i>
-                    Vimeo
-                </button>
-                <button onclick="testLink('https://www.dailymotion.com/video/x8m9r2a')" class="platform-btn bg-gradient-to-br from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white px-4 py-4 rounded-2xl font-bold shadow-lg">
-                    <i class="fas fa-play-circle text-2xl mb-1 block"></i>
-                    Dailymotion
-                </button>
-                <button onclick="testLink('https://twitter.com/SpaceX/status/1748354168953684028')" class="platform-btn bg-gradient-to-br from-sky-600 to-blue-700 hover:from-sky-500 hover:to-blue-600 text-white px-4 py-4 rounded-2xl font-bold shadow-lg">
-                    <i class="fab fa-twitter text-2xl mb-1 block"></i>
-                    Twitter
-                </button>
+            <div class="flex flex-wrap justify-center gap-3 mb-12">
+                <span class="platform-tag"><i class="fab fa-youtube mr-2"></i>YouTube</span>
+                <span class="platform-tag"><i class="fab fa-facebook mr-2"></i>Facebook</span>
+                <span class="platform-tag"><i class="fab fa-twitter mr-2"></i>X / Twitter</span>
+                <span class="platform-tag"><i class="fab fa-tiktok mr-2"></i>TikTok</span>
+                <span class="platform-tag"><i class="fab fa-instagram mr-2"></i>Instagram</span>
+                <span class="platform-tag">+ 1000 more</span>
             </div>
-            
-            <p class="text-slate-400 text-sm text-center mt-4">
-                <i class="fas fa-info-circle mr-1"></i>
-                YouTube often blocks server IPs. Use TikTok, Vimeo, or Dailymotion for best results.
-            </p>
         </div>
 
         <!-- Search Bar -->
-        <div class="max-w-3xl mx-auto mb-12">
-            <div class="neon-border glass p-2 rounded-3xl flex flex-col md:flex-row gap-2">
-                <div class="flex-1 flex items-center px-5">
-                    <i class="fas fa-link text-violet-500 mr-4 text-xl"></i>
+        <div class="max-w-3xl mx-auto mb-20">
+            <div class="premium-border glass p-2 rounded-3xl flex flex-col md:flex-row gap-2">
+                <div class="flex-1 flex items-center px-4">
+                    <i class="fas fa-link text-indigo-500 mr-4 text-xl"></i>
                     <input 
                         id="videoUrl"
                         type="text" 
-                        placeholder="Paste any video URL here..." 
+                        placeholder="Paste your link here..." 
                         class="w-full bg-transparent border-none outline-none py-4 text-white placeholder-slate-500 text-lg font-medium"
-                        onkeypress="if(event.key === 'Enter') analyzeVideo()"
                     >
                 </div>
                 <button 
                     onclick="analyzeVideo()"
                     id="analyzeBtn"
-                    class="btn-glow bg-gradient-to-r from-violet-600 to-pink-600 text-white font-bold py-4 px-10 rounded-2xl flex items-center justify-center gap-3 min-w-[180px]"
+                    class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 px-10 rounded-2xl transition-all flex items-center justify-center space-x-3 btn-glow"
                 >
-                    <span id="btnText">Download</span>
-                    <i id="btnIcon" class="fas fa-arrow-right"></i>
+                    <span id="btnText">Process Link</span>
                     <div id="btnLoader" class="loader hidden"></div>
                 </button>
             </div>
         </div>
 
-        <!-- Error Container -->
-        <div id="errorContainer" class="hidden max-w-3xl mx-auto mb-8"></div>
-
         <!-- Result Section -->
-        <div id="resultContainer" class="hidden">
+        <div id="resultContainer" class="hidden animate-in fade-in slide-in-from-bottom-8 duration-700">
             <div class="grid lg:grid-cols-12 gap-8">
-                <!-- Video Info Card -->
+                <!-- Video Sidebar -->
                 <div class="lg:col-span-4">
-                    <div class="glass rounded-3xl overflow-hidden p-5 sticky top-8">
-                        <div class="relative mb-5">
-                            <img id="videoThumb" src="" alt="Thumbnail" class="w-full h-48 object-cover rounded-2xl shadow-2xl bg-slate-800">
-                            <div class="absolute bottom-3 right-3 bg-black/80 backdrop-blur px-3 py-1 rounded-lg text-sm font-bold">
-                                <span id="videoDuration">00:00</span>
-                            </div>
-                        </div>
-                        <h3 id="videoTitle" class="text-lg font-bold mb-4 line-clamp-2 leading-tight">Video Title</h3>
-                        <div class="space-y-3 text-sm">
-                            <div class="flex justify-between items-center py-2 border-b border-white/5">
-                                <span class="text-slate-500"><i class="fas fa-user mr-2"></i>Creator</span>
-                                <span id="videoUploader" class="text-white font-semibold truncate max-w-[150px]">Unknown</span>
-                            </div>
-                            <div class="flex justify-between items-center py-2 border-b border-white/5">
-                                <span class="text-slate-500"><i class="fas fa-eye mr-2"></i>Views</span>
-                                <span id="videoViews" class="text-white font-semibold">0</span>
-                            </div>
-                            <div class="flex justify-between items-center py-2">
-                                <span class="text-slate-500"><i class="fas fa-download mr-2"></i>Formats</span>
-                                <span id="totalFormats" class="text-violet-400 font-semibold">0 options</span>
+                    <div class="glass rounded-[2rem] overflow-hidden p-4 sticky top-8">
+                        <img id="videoThumb" src="" alt="Thumbnail" class="w-full h-56 object-cover rounded-2xl mb-6 shadow-2xl">
+                        <div class="px-2">
+                            <h3 id="videoTitle" class="text-2xl font-bold mb-4 line-clamp-2 leading-tight">Video Title</h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-slate-500">Creator</span>
+                                    <span id="videoUploader" class="text-slate-200 font-bold">Unknown</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-slate-500">Duration</span>
+                                    <span id="videoDuration" class="text-slate-200 font-bold">00:00</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-slate-500">Total Views</span>
+                                    <span id="videoViews" class="text-slate-200 font-bold">0</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Download Options -->
+                <!-- Download Hub -->
                 <div class="lg:col-span-8">
-                    <div class="glass rounded-3xl p-6">
-                        <!-- Tabs -->
-                        <div class="flex flex-wrap gap-2 mb-6 pb-4 border-b border-white/10">
-                            <button onclick="switchTab('normal')" id="tab-normal" class="tab-btn active px-5 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-white/5 transition text-white">
-                                <i class="fas fa-video text-violet-400"></i> 
-                                Full Video
-                                <span id="count-normal" class="format-count">0</span>
+                    <div class="glass rounded-[2rem] p-8">
+                        <div class="flex flex-wrap gap-6 mb-10 border-b border-white/5">
+                            <button onclick="switchTab('normal')" id="tab-normal" class="tab-btn active pb-4 px-2 font-bold transition text-lg">
+                                <i class="fas fa-video mr-2"></i> Full Video
                             </button>
-                            <button onclick="switchTab('audio')" id="tab-audio" class="tab-btn px-5 py-3 rounded-xl font-bold flex items-center gap-2 text-slate-400 hover:bg-white/5 transition">
-                                <i class="fas fa-music text-pink-400"></i> 
-                                Audio Only
-                                <span id="count-audio" class="format-count">0</span>
+                            <button onclick="switchTab('audio')" id="tab-audio" class="tab-btn pb-4 px-2 font-bold transition text-slate-400 text-lg">
+                                <i class="fas fa-music mr-2"></i> Audio High
                             </button>
-                            <button onclick="switchTab('videoOnly')" id="tab-videoOnly" class="tab-btn px-5 py-3 rounded-xl font-bold flex items-center gap-2 text-slate-400 hover:bg-white/5 transition">
-                                <i class="fas fa-film text-cyan-400"></i> 
-                                No Audio
-                                <span id="count-video" class="format-count">0</span>
+                            <button onclick="switchTab('videoOnly')" id="tab-videoOnly" class="tab-btn pb-4 px-2 font-bold transition text-slate-400 text-lg">
+                                <i class="fas fa-film mr-2"></i> Video Only
                             </button>
                         </div>
 
-                        <!-- Download Grids -->
-                        <div id="grid-normal" class="download-grid grid sm:grid-cols-2 gap-3"></div>
-                        <div id="grid-audio" class="download-grid hidden grid sm:grid-cols-2 gap-3"></div>
-                        <div id="grid-videoOnly" class="download-grid hidden grid sm:grid-cols-2 gap-3"></div>
+                        <div id="grid-normal" class="download-grid grid sm:grid-cols-2 gap-5"></div>
+                        <div id="grid-audio" class="download-grid hidden grid sm:grid-cols-2 gap-5"></div>
+                        <div id="grid-videoOnly" class="download-grid hidden grid sm:grid-cols-2 gap-5"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Features Section -->
-        <div class="mt-24 grid md:grid-cols-3 gap-6">
-            <div class="glass rounded-2xl p-6 text-center">
-                <div class="w-14 h-14 bg-violet-500/10 border border-violet-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-robot text-2xl text-violet-400"></i>
+        <!-- How It Works -->
+        <div class="mt-32 grid md:grid-cols-3 gap-8 text-center">
+            <div class="p-8">
+                <div class="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-white/10">
+                    <i class="fas fa-paste text-2xl text-indigo-500"></i>
                 </div>
-                <h4 class="text-lg font-bold mb-2">Browser Automation</h4>
-                <p class="text-slate-500 text-sm">Playwright-powered extraction bypasses bot detection.</p>
+                <h4 class="text-xl font-bold mb-3">Copy URL</h4>
+                <p class="text-slate-500">Grab the link from any of the 1,000+ supported websites.</p>
             </div>
-            <div class="glass rounded-2xl p-6 text-center">
-                <div class="w-14 h-14 bg-pink-500/10 border border-pink-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-layer-group text-2xl text-pink-400"></i>
+            <div class="p-8">
+                <div class="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-white/10">
+                    <i class="fas fa-magic text-2xl text-purple-500"></i>
                 </div>
-                <h4 class="text-lg font-bold mb-2">8 Quality Levels</h4>
-                <p class="text-slate-500 text-sm">Full Video, Audio, and Video-only with 8 options each.</p>
+                <h4 class="text-xl font-bold mb-3">Instant Analysis</h4>
+                <p class="text-slate-500">Our engine finds the highest quality formats in seconds.</p>
             </div>
-            <div class="glass rounded-2xl p-6 text-center">
-                <div class="w-14 h-14 bg-cyan-500/10 border border-cyan-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-globe text-2xl text-cyan-400"></i>
+            <div class="p-8">
+                <div class="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-white/10">
+                    <i class="fas fa-cloud-download-alt text-2xl text-rose-500"></i>
                 </div>
-                <h4 class="text-lg font-bold mb-2">1000+ Sites</h4>
-                <p class="text-slate-500 text-sm">TikTok, Twitter, Instagram, Vimeo, Facebook & more.</p>
+                <h4 class="text-xl font-bold mb-3">Download</h4>
+                <p class="text-slate-500">Choose your preferred quality and start the download.</p>
             </div>
         </div>
 
         <!-- Footer -->
-        <footer class="mt-20 py-8 border-t border-white/5 text-center">
-            <p class="text-slate-600 text-sm font-medium">KunalPRO Elite • Powered by Playwright & yt-dlp</p>
+        <footer class="mt-40 py-12 border-t border-white/5 text-center">
+            <div class="flex justify-center space-x-6 mb-8 text-slate-500 text-xl">
+                <a href="#"><i class="fab fa-github hover:text-white transition"></i></a>
+                <a href="#"><i class="fab fa-discord hover:text-white transition"></i></a>
+                <a href="#"><i class="fab fa-twitter hover:text-white transition"></i></a>
+            </div>
+            <p class="text-slate-500 text-sm tracking-widest uppercase font-bold">Vault Pro • 2024 Ultimate Edition</p>
         </footer>
     </div>
 
     <script>
         let currentData = null;
 
-        // Check server status
+        // Verify server is alive on load
         window.addEventListener('load', async () => {
-            const statusEl = document.getElementById('serverStatus');
             try {
-                const res = await fetch('/health');
-                if (res.ok) {
-                    statusEl.className = 'hidden md:flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 rounded-full text-emerald-400 text-sm font-medium';
-                    statusEl.innerHTML = '<span class="w-2 h-2 bg-emerald-400 rounded-full status-pulse"></span>Server Online';
-                }
+                const check = await fetch('/health');
+                if (check.ok) console.log("Server Connection: Active");
             } catch (e) {
-                statusEl.className = 'hidden md:flex items-center gap-2 px-4 py-2 bg-red-500/10 border border-red-500/30 rounded-full text-red-400 text-sm font-medium';
-                statusEl.innerHTML = '<span class="w-2 h-2 bg-red-400 rounded-full"></span>Offline';
+                console.warn("Server not reachable yet. This is normal if running locally without the Flask server started.");
             }
         });
-
-        function testLink(url) {
-            document.getElementById('videoUrl').value = url;
-            analyzeVideo();
-        }
 
         async function analyzeVideo() {
             const urlInput = document.getElementById('videoUrl');
             const analyzeBtn = document.getElementById('analyzeBtn');
             const btnText = document.getElementById('btnText');
-            const btnIcon = document.getElementById('btnIcon');
             const btnLoader = document.getElementById('btnLoader');
+            const resultContainer = document.getElementById('resultContainer');
 
-            if (!urlInput.value.trim()) {
-                showError('Please enter a video URL first!');
-                return;
-            }
+            if (!urlInput.value) return alert('Please enter a URL');
 
-            // Loading state
+            // UI Loading State
             analyzeBtn.disabled = true;
             btnText.textContent = 'Analyzing...';
-            btnIcon.classList.add('hidden');
             btnLoader.classList.remove('hidden');
-            hideError();
 
             try {
+                // Always try relative path first for same-origin hosting (Render)
+                // Fallback to localhost only if absolute path is needed for local dev
                 let apiEndpoint = '/analyze';
+                
                 if (window.location.protocol === 'file:') {
                     apiEndpoint = 'http://127.0.0.1:10000/analyze';
                 }
 
                 const response = await fetch(apiEndpoint, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
                     body: JSON.stringify({ url: urlInput.value })
                 });
-
+                
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({}));
                     throw new Error(errorData.error || `Server error: ${response.status}`);
                 }
 
                 const data = await response.json();
-
+                
                 if (data.error) {
-                    showError(data.error);
+                    alert('Error: ' + data.error);
                 } else {
-                    hideError();
                     displayResults(data);
                 }
             } catch (err) {
-                let msg = err.message || 'Connection failed';
-                if (msg.includes('Failed to fetch')) {
-                    msg = 'Cannot connect to server. Run "python app.py" first!';
-                }
-                showError(msg);
+                console.error("Fetch Error:", err);
+                alert(`Error: ${err.message || 'Connection to server failed'}. If you are on Render, wait a minute for the service to wake up.`);
             } finally {
                 analyzeBtn.disabled = false;
-                btnText.textContent = 'Download';
-                btnIcon.classList.remove('hidden');
+                btnText.textContent = 'Analyze Link';
                 btnLoader.classList.add('hidden');
             }
         }
 
         function displayResults(data) {
             currentData = data;
+            document.getElementById('videoThumb').src = data.thumbnail;
+            document.getElementById('videoTitle').textContent = data.title;
+            document.getElementById('videoUploader').textContent = data.uploader;
+            document.getElementById('videoViews').textContent = data.views;
             
-            // Set thumbnail with fallback
-            const thumb = document.getElementById('videoThumb');
-            thumb.src = data.thumbnail || '';
-            thumb.onerror = function() {
-                this.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 225" fill="%231e293b"><rect width="400" height="225"/><text x="200" y="120" text-anchor="middle" fill="%2364748b" font-size="20">No Thumbnail</text></svg>';
-            };
-            
-            document.getElementById('videoTitle').textContent = data.title || 'Untitled';
-            document.getElementById('videoUploader').textContent = data.uploader || 'Unknown';
-            document.getElementById('videoViews').textContent = data.views || 'N/A';
-            
-            const duration = data.duration || 0;
-            const mins = Math.floor(duration / 60);
-            const secs = duration % 60;
+            const mins = Math.floor(data.duration / 60);
+            const secs = data.duration % 60;
             document.getElementById('videoDuration').textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
 
-            const normalCount = (data.normal || []).length;
-            const audioCount = (data.audio || []).length;
-            const videoCount = (data.video || []).length;
-            const totalFormats = normalCount + audioCount + videoCount;
-            
-            document.getElementById('totalFormats').textContent = `${totalFormats} options`;
-            document.getElementById('count-normal').textContent = normalCount;
-            document.getElementById('count-audio').textContent = audioCount;
-            document.getElementById('count-video').textContent = videoCount;
+            renderGrid('normal', data.normal);
+            renderGrid('audio', data.audio);
+            renderGrid('videoOnly', data.video);
 
-            renderGrid('normal', data.normal || []);
-            renderGrid('audio', data.audio || []);
-            renderGrid('videoOnly', data.video || []);
-
-            document.getElementById('resultContainer').classList.remove('hidden');
-            document.getElementById('resultContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            const container = document.getElementById('resultContainer');
+            container.classList.remove('hidden');
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
             switchTab('normal');
-        }
-
-        function getQualityBadge(quality) {
-            const q = quality.toLowerCase();
-            if (q.includes('2160') || q.includes('4k') || q.includes('1440')) {
-                return '<span class="quality-badge ultra">4K ULTRA</span>';
-            } else if (q.includes('1080')) {
-                return '<span class="quality-badge hd">FULL HD</span>';
-            } else if (q.includes('720')) {
-                return '<span class="quality-badge hd">HD</span>';
-            } else if (q.includes('256') || q.includes('320')) {
-                return '<span class="quality-badge ultra">HI-FI</span>';
-            } else if (q.includes('128') || q.includes('160') || q.includes('192')) {
-                return '<span class="quality-badge hd">GOOD</span>';
-            } else if (q.includes('480') || q.includes('360')) {
-                return '<span class="quality-badge sd">SD</span>';
-            }
-            return '';
         }
 
         function renderGrid(type, formats) {
@@ -532,103 +379,43 @@
             if (!formats || formats.length === 0) {
                 grid.innerHTML = `
                     <div class="col-span-full py-12 text-center">
-                        <i class="fas fa-box-open text-4xl text-slate-700 mb-3"></i>
-                        <p class="text-slate-500">No formats available in this category.</p>
-                        <p class="text-slate-600 text-sm mt-2">Try a different video or platform.</p>
+                        <i class="fas fa-exclamation-triangle text-3xl text-slate-700 mb-4"></i>
+                        <p class="text-slate-500">No formats available for this category.</p>
                     </div>
                 `;
                 return;
             }
 
-            formats.forEach((f, index) => {
+            formats.forEach(f => {
                 const card = document.createElement('div');
-                card.className = 'quality-card bg-white/5 border border-white/10 p-4 rounded-2xl flex justify-between items-center group cursor-pointer';
-                
-                const qualityLabel = f.quality || 'Auto';
-                const badge = getQualityBadge(qualityLabel);
-                const ext = (f.ext || 'mp4').toUpperCase();
-                const size = f.size || 'Stream';
-                
-                // Rank indicator for top qualities
-                let rankBadge = '';
-                if (index === 0) {
-                    rankBadge = '<span class="text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded font-bold ml-2">BEST</span>';
-                }
-                
+                card.className = 'quality-card bg-white/5 border border-white/5 p-5 rounded-2xl flex justify-between items-center group hover:border-indigo-500/30';
                 card.innerHTML = `
                     <div>
-                        <div class="flex items-center gap-2 mb-1 flex-wrap">
-                            <span class="text-xl font-black text-white">${qualityLabel}</span>
-                            ${badge}
-                            ${rankBadge}
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-lg font-black text-white">${f.quality}</span>
+                            ${f.quality.includes('1080') || f.quality.includes('4k') ? '<span class="text-[10px] bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 rounded font-bold">PRO</span>' : ''}
                         </div>
-                        <div class="text-xs text-slate-500 uppercase font-bold tracking-wider">
-                            ${ext} • ${size}
-                        </div>
+                        <div class="text-xs text-slate-500 uppercase font-bold tracking-wider">${f.ext} • ${f.size}</div>
                     </div>
-                    <a href="${f.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="download-btn w-12 h-12 flex items-center justify-center bg-violet-500/10 rounded-xl transition-all duration-300 hover:scale-110">
-                        <i class="fas fa-download text-lg text-violet-400"></i>
+                    <a href="${f.url}" target="_blank" download class="w-12 h-12 flex items-center justify-center bg-indigo-600/10 group-hover:bg-indigo-600 rounded-xl transition-all duration-300">
+                        <i class="fas fa-arrow-down text-indigo-500 group-hover:text-white"></i>
                     </a>
                 `;
-                
-                card.onclick = () => window.open(f.url, '_blank');
                 grid.appendChild(card);
             });
         }
 
         function switchTab(type) {
+            // Update buttons
             document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active', 'text-white');
+                btn.classList.remove('active', 'text-indigo-400');
                 btn.classList.add('text-slate-400');
             });
-            document.getElementById(`tab-${type}`).classList.add('active', 'text-white');
-            document.getElementById(`tab-${type}`).classList.remove('text-slate-400');
+            document.getElementById(`tab-${type}`).classList.add('active', 'text-indigo-400');
 
-            document.querySelectorAll('.download-grid').forEach(g => g.classList.add('hidden'));
+            // Update grids
+            document.querySelectorAll('.download-grid').forEach(grid => grid.classList.add('hidden'));
             document.getElementById(`grid-${type}`).classList.remove('hidden');
-        }
-
-        function showError(message) {
-            hideError();
-            const container = document.getElementById('errorContainer');
-            container.classList.remove('hidden');
-
-            const isYouTube = message.toLowerCase().includes('youtube');
-
-            container.innerHTML = `
-                <div class="bg-red-500/10 border border-red-500/30 rounded-2xl p-5">
-                    <div class="flex items-start gap-4">
-                        <div class="w-10 h-10 bg-red-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-exclamation-triangle text-red-400"></i>
-                        </div>
-                        <div class="flex-1">
-                            <h4 class="text-red-400 font-bold mb-2">Extraction Error</h4>
-                            <p class="text-slate-300 text-sm mb-3">${message}</p>
-                            ${isYouTube ? `
-                                <p class="text-slate-400 text-sm mb-2">Try these platforms instead:</p>
-                                <div class="flex flex-wrap gap-2">
-                                    <button onclick="testLink('https://www.tiktok.com/@zachking/video/7322754598498908459')" class="text-xs bg-pink-500/30 text-pink-300 px-3 py-2 rounded-full hover:bg-pink-500/50 transition font-bold">
-                                        <i class="fab fa-tiktok mr-1"></i> TikTok
-                                    </button>
-                                    <button onclick="testLink('https://vimeo.com/824804225')" class="text-xs bg-cyan-500/30 text-cyan-300 px-3 py-2 rounded-full hover:bg-cyan-500/50 transition font-bold">
-                                        <i class="fab fa-vimeo-v mr-1"></i> Vimeo
-                                    </button>
-                                    <button onclick="testLink('https://www.dailymotion.com/video/x8m9r2a')" class="text-xs bg-orange-500/30 text-orange-300 px-3 py-2 rounded-full hover:bg-orange-500/50 transition font-bold">
-                                        <i class="fas fa-play mr-1"></i> Dailymotion
-                                    </button>
-                                </div>
-                            ` : ''}
-                        </div>
-                        <button onclick="hideError()" class="text-slate-500 hover:text-white">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                </div>
-            `;
-        }
-
-        function hideError() {
-            document.getElementById('errorContainer').classList.add('hidden');
         }
     </script>
 </body>
