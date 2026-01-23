@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 # Directory settings
 base_dir = os.path.abspath(os.path.dirname(__file__))
 
-app = Flask(__name__, static_folder=base_dir, template_folder=base_dir)
+aapp = Flask(__name__, static_folder=base_dir, template_folder=os.path.join(base_dir, 'templates'))
 CORS(app)
 
 def get_video_info(url):
